@@ -15,11 +15,11 @@
             <h2>Grand Luxury <span>Hotel</span></h2>
         </div>
         <nav class="nav-menu">
-            <a href="#" class="active">📊 Overview Dashboard</a>
-            <a href="#">🌐 OTA Breakdown</a>
-            <a href="#">💳 Reservations List</a>
-            <a href="#">📈 ADR & Occupancy</a>
-            <a href="#">⚙️ Settings</a>
+            <a href="#" class="nav-item active" data-target="overview-section">📊 Overview Dashboard</a>
+            <a href="#" class="nav-item" data-target="ota-section">🌐 OTA Breakdown</a>
+            <a href="#" class="nav-item" data-target="reservations-section">💳 Reservations List</a>
+            <a href="#" class="nav-item" data-target="analytics-section">📈 ADR & Occupancy</a>
+            <a href="#" class="nav-item" data-target="settings-section">⚙️ Settings</a>
         </nav>
     </aside>
 
@@ -28,59 +28,149 @@
         <header class="topbar">
             <div>
                 <h1>Grand Luxury Hotel & Resort</h1>
-                <p>Dashboard Analisis Revenue & Penjualan Multi-Channel OTA (Traveloka, Agoda, Booking.com, Tiket.com, dll.)</p>
+                <p>Dashboard Analisis Revenue & Penjualan Multi-Channel OTA</p>
             </div>
             <div class="user-profile">
                 <span>Halo, <strong>Astrid (Revenue Analyst)</strong></span>
             </div>
         </header>
 
-        <!-- KPI Summary Cards -->
-        <section class="kpi-grid">
-            <div class="card">
-                <h3>Total Revenue Hotel</h3>
-                <p class="value" id="totalRevenue">Rp 0</p>
-                <span class="trend positive">↑ +14.2% vs bulan lalu</span>
+        <!-- 1. OVERVIEW DASHBOARD SECTION -->
+        <section id="overview-section" class="content-section active-section">
+            <div class="kpi-grid">
+                <div class="card">
+                    <h3>Total Revenue Hotel</h3>
+                    <p class="value" id="totalRevenue">Rp 0</p>
+                    <span class="trend positive">↑ +14.2% vs bulan lalu</span>
+                </div>
+                <div class="card">
+                    <h3>Total Room Nights</h3>
+                    <p class="value" id="roomNights">0</p>
+                    <span class="trend positive">↑ +9.5% vs bulan lalu</span>
+                </div>
+                <div class="card">
+                    <h3>Average Daily Rate (ADR)</h3>
+                    <p class="value" id="adrValue">Rp 0</p>
+                    <span class="trend neutral">— Stabil</span>
+                </div>
+                <div class="card">
+                    <h3>Top Performing Channel</h3>
+                    <p class="value" id="topChannel">-</p>
+                    <span class="trend positive">Kontributor Terbesar</span>
+                </div>
             </div>
-            <div class="card">
-                <h3>Total Room Nights</h3>
-                <p class="value" id="roomNights">0</p>
-                <span class="trend positive">↑ +9.5% vs bulan lalu</span>
-            </div>
-            <div class="card">
-                <h3>Average Daily Rate (ADR)</h3>
-                <p class="value" id="adrValue">Rp 0</p>
-                <span class="trend neutral">— Stabil</span>
-            </div>
-            <div class="card">
-                <h3>Top Performing Channel</h3>
-                <p class="value" id="topChannel">-</p>
-                <span class="trend positive">Kontributor Terbesar</span>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Rincian Transaksi Booking per Channel OTA</h2>
+                    <button id="btnRefresh" class="btn-primary">🔄 Sync Data OTA</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>OTA / Channel</th>
+                            <th>Tipe Kamar</th>
+                            <th>Durasi</th>
+                            <th>Total Revenue</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingTableBody"></tbody>
+                </table>
             </div>
         </section>
 
-        <!-- Recent Reservations Table -->
-        <section class="table-container">
-            <div class="table-header">
-                <h2>Rincian Transaksi Booking per Channel OTA</h2>
-                <button id="btnRefresh" class="btn-primary">🔄 Sync Data OTA</button>
+        <!-- 2. OTA BREAKDOWN SECTION -->
+        <section id="ota-section" class="content-section">
+            <div class="table-container">
+                <h2>🌐 Performa & Market Share per Channel OTA</h2>
+                <p style="color:#64748b; margin-bottom: 20px; font-size:0.88rem;">Analisis kontribusi pendapatan dan pangsa pasar dari masing-masing kanal distribusi online.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Channel Name</th>
+                            <th>Jumlah Booking</th>
+                            <th>Total Revenue</th>
+                            <th>Market Share (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="otaBreakdownBody"></tbody>
+                </table>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Booking ID</th>
-                        <th>OTA / Channel</th>
-                        <th>Tipe Kamar</th>
-                        <th>Durasi (Malam)</th>
-                        <th>Total Revenue</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="bookingTableBody">
-                    <!-- Data dimuat via script.js -->
-                </tbody>
-            </table>
         </section>
+
+        <!-- 3. RESERVATIONS LIST SECTION -->
+        <section id="reservations-section" class="content-section">
+            <div class="table-container">
+                <h2>💳 Daftar Lengkap Reservasi Kamar</h2>
+                <p style="color:#64748b; margin-bottom: 20px; font-size:0.88rem;">Semua riwayat transaksi reservasi tamu dari seluruh OTA & Direct Booking.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Channel</th>
+                            <th>Tipe Kamar</th>
+                            <th>Durasi</th>
+                            <th>Total Price</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allReservationsBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 4. ANALYTICS SECTION -->
+        <section id="analytics-section" class="content-section">
+            <div class="table-container">
+                <h2>📈 Analisis ADR & Tingkat Hunian (Occupancy)</h2>
+                <p style="color:#64748b; margin-bottom:20px; font-size:0.88rem;">Performa rata-rata harga kamar dan keterisian kamar Grand Luxury Hotel.</p>
+                
+                <div class="kpi-grid">
+                    <div class="card">
+                        <h3>Occupancy Rate</h3>
+                        <p class="value">78.5%</p>
+                        <span class="trend positive">↑ +5% dari target</span>
+                    </div>
+                    <div class="card">
+                        <h3>RevPAR (Revenue Per Available Room)</h3>
+                        <p class="value">Rp 1.413.000</p>
+                        <span class="trend positive">↑ Performa Sangat Baik</span>
+                    </div>
+                    <div class="card">
+                        <h3>Average Length of Stay (ALOS)</h3>
+                        <p class="value">2.1 Malam</p>
+                        <span class="trend neutral">— Rata-rata stabil</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. SETTINGS SECTION -->
+        <section id="settings-section" class="content-section">
+            <div class="table-container">
+                <h2>⚙️ Pengaturan Akun & Properti Hotel</h2>
+                <p style="color:#64748b; margin-bottom:20px; font-size:0.88rem;">Kelola informasi properti dan profil akun Revenue Analyst.</p>
+                
+                <form style="display:flex; flex-direction:column; gap:16px; max-width:450px;">
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Nama Properti Hotel</label>
+                        <input type="text" value="Grand Luxury Hotel & Resort" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Nama Revenue Analyst</label>
+                        <input type="text" value="Astrid Pratiwi" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Email Otorisasi Sync</label>
+                        <input type="email" value="astrdpratiwi@gmail.com" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;">
+                    </div>
+                    <button type="button" class="btn-primary" style="width:fit-content; margin-top:5px;">Simpan Perubahan</button>
+                </form>
+            </div>
+        </section>
+
     </main>
 
     <script src="script.js"></script>

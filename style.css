@@ -201,3 +201,11 @@ th {
 .badge.confirmed { background-color: #dcfce7; color: #15803d; }
 .badge.pending { background-color: #fef9c3; color: #a16207; }
 .badge.cancelled { background-color: #fee2e2; color: #b91c1c; }
+/* Pengaturan Perpindahan Halaman Sidebar */
+.content-section {
+    display: none;
+}
+
+.content-section.active-section {
+    display: block;
+}

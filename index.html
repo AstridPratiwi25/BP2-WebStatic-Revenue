@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Revenue Dashboard - Multi-OTA Ecommerce</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand">
+            <h2>RevenueHub <span>Multi-OTA</span></h2>
+        </div>
+        <nav class="nav-menu">
+            <a href="#" class="active">📊 Overview Dashboard</a>
+            <a href="#">🏨 Hotel Performance</a>
+            <a href="#">🌐 Channel Distribution</a>
+            <a href="#">💳 Reservations List</a>
+            <a href="#">📈 ADR & RevPAR Analytics</a>
+            <a href="#">⚙️ Settings</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <h1>Hotel Revenue & Channel Dashboard</h1>
+                <p>Monitoring performa penjualan dari Traveloka, Agoda, Booking.com, Tiket.com, Expedia, Trip.com & Direct Website.</p>
+            </div>
+            <div class="user-profile">
+                <span>Halo, <strong>Revenue Manager</strong></span>
+            </div>
+        </header>
+
+        <!-- KPI Summary Cards -->
+        <section class="kpi-grid">
+            <div class="card">
+                <h3>Total Revenue All Channels</h3>
+                <p class="value" id="totalRevenue">Rp 0</p>
+                <span class="trend positive">↑ +14.2% vs bulan lalu</span>
+            </div>
+            <div class="card">
+                <h3>Total Room Nights</h3>
+                <p class="value" id="roomNights">0</p>
+                <span class="trend positive">↑ +9.5% vs bulan lalu</span>
+            </div>
+            <div class="card">
+                <h3>Average Daily Rate (ADR)</h3>
+                <p class="value" id="adrValue">Rp 0</p>
+                <span class="trend neutral">— Stabil</span>
+            </div>
+            <div class="card">
+                <h3>Top Channel Revenue</h3>
+                <p class="value" id="topChannel">-</p>
+                <span class="trend positive">Kontributor Terbesar</span>
+            </div>
+        </section>
+
+        <!-- Recent Reservations Table -->
+        <section class="table-container">
+            <div class="table-header">
+                <h2>Transaksi Booking Terkini (By Channel)</h2>
+                <button id="btnRefresh" class="btn-primary">🔄 Sync Data OTA</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>OTA / Channel</th>
+                        <th>Nama Hotel</th>
+                        <th>Tipe Kamar</th>
+                        <th>Malam</th>
+                        <th>Total Revenue</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingTableBody">
+                    <!-- Data dimuat via script.js -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

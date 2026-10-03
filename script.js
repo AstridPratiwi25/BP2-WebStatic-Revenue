@@ -1,13 +1,13 @@
 // Data Simulasi Transaksi Multi-Channel OTA untuk Grand Luxury Hotel
 const bookingData = [
-    { id: "BK-901", channel: "Traveloka", otaClass: "ota-traveloka", room: "Deluxe Ocean View", nights: 3, price: 4500000, status: "confirmed" },
-    { id: "BK-902", channel: "Tiket.com", otaClass: "ota-tiket", room: "Grand Deluxe King", nights: 2, price: 3200000, status: "confirmed" },
-    { id: "BK-903", channel: "Agoda", otaClass: "ota-agoda", room: "Superior Room", nights: 1, price: 1200000, status: "confirmed" },
-    { id: "BK-904", channel: "Booking.com", otaClass: "ota-booking", room: "Executive Suite", nights: 2, price: 5000000, status: "confirmed" },
-    { id: "BK-905", channel: "Expedia", otaClass: "ota-expedia", room: "Deluxe Ocean View", nights: 2, price: 3000000, status: "cancelled" },
-    { id: "BK-906", channel: "Trip.com", otaClass: "ota-trip", room: "Superior Room", nights: 4, price: 4800000, status: "confirmed" },
-    { id: "BK-907", channel: "Direct Website", otaClass: "ota-website", room: "Presidential Suite", nights: 2, price: 8500000, status: "confirmed" },
-    { id: "BK-908", channel: "Traveloka", otaClass: "ota-traveloka", room: "Superior Room", nights: 1, price: 1200000, status: "pending" }
+    { id: "BK-901", guest: "Budi Santoso", channel: "Traveloka", otaClass: "ota-traveloka", room: "Deluxe Ocean View", nights: 3, price: 4500000, status: "confirmed" },
+    { id: "BK-902", guest: "Siti Rahma", channel: "Tiket.com", otaClass: "ota-tiket", room: "Grand Deluxe King", nights: 2, price: 3200000, status: "confirmed" },
+    { id: "BK-903", guest: "Michael Scott", channel: "Agoda", otaClass: "ota-agoda", room: "Superior Room", nights: 1, price: 1200000, status: "confirmed" },
+    { id: "BK-904", guest: "Jessica Tan", channel: "Booking.com", otaClass: "ota-booking", room: "Executive Suite", nights: 2, price: 5000000, status: "confirmed" },
+    { id: "BK-905", guest: "Ahmad Dahlan", channel: "Expedia", otaClass: "ota-expedia", room: "Deluxe Ocean View", nights: 2, price: 3000000, status: "cancelled" },
+    { id: "BK-906", guest: "David Kim", channel: "Trip.com", otaClass: "ota-trip", room: "Superior Room", nights: 4, price: 4800000, status: "confirmed" },
+    { id: "BK-907", guest: "Rina Wijaya", channel: "Direct Website", otaClass: "ota-website", room: "Presidential Suite", nights: 2, price: 8500000, status: "confirmed" },
+    { id: "BK-908", guest: "Eko Prasetyo", channel: "Traveloka", otaClass: "ota-traveloka", room: "Superior Room", nights: 1, price: 1200000, status: "pending" }
 ];
 
 // Helper Format Rupiah
@@ -15,101 +15,139 @@ function formatRupiah(number) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
 }
 
-// 1. Render Overview Dashboard
-function renderDashboard() {
-    const tableBody = document.getElementById('bookingTableBody');
-    if (!tableBody) return;
-    tableBody.innerHTML = '';
-
+// Render Semua Menu
+function renderAllPages() {
     let totalRev = 0;
     let totalNights = 0;
     let validBookingsCount = 0;
-    const channelRevenue = {};
+    const channelStats = {};
+    const roomStats = {};
 
+    // Hitung statistik
     bookingData.forEach(item => {
         if (item.status !== 'cancelled') {
             totalRev += item.price;
             totalNights += item.nights;
             validBookingsCount++;
-            channelRevenue[item.channel] = (channelRevenue[item.channel] || 0) + item.price;
-        }
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>${item.id}</strong></td>
-            <td><span class="channel-badge ${item.otaClass}">${item.channel}</span></td>
-            <td>${item.room}</td>
-            <td>${item.nights} Malam</td>
-            <td>${formatRupiah(item.price)}</td>
-            <td><span class="badge ${item.status}">${item.status.toUpperCase()}</span></td>
-        `;
-        tableBody.appendChild(row);
+            // Channel stats
+            if (!channelStats[item.channel]) {
+                channelStats[item.channel] = { count: 0, nights: 0, rev: 0 };
+            }
+            channelStats[item.channel].count++;
+            channelStats[item.channel].nights += item.nights;
+            channelStats[item.channel].rev += item.price;
+
+            // Room stats
+            if (!roomStats[item.room]) {
+                roomStats[item.room] = { count: 0, rev: 0, nights: 0 };
+            }
+            roomStats[item.room].count++;
+            roomStats[item.room].rev += item.price;
+            roomStats[item.room].nights += item.nights;
+        }
     });
 
-    let topChannelName = "-";
-    let maxRev = 0;
-    for (const [channel, rev] of Object.entries(channelRevenue)) {
-        if (rev > maxRev) {
-            maxRev = rev;
-            topChannelName = channel;
-        }
+    const adr = validBookingsCount > 0 ? (totalRev / totalNights) : 0;
+
+    // 1. MENU: OVERVIEW
+    const overviewBody = document.getElementById('bookingTableBody');
+    if (overviewBody) {
+        overviewBody.innerHTML = '';
+        bookingData.forEach(item => {
+            overviewBody.innerHTML += `
+                <tr>
+                    <td><strong>${item.id}</strong></td>
+                    <td><span class="channel-badge ${item.otaClass}">${item.channel}</span></td>
+                    <td>${item.room}</td>
+                    <td>${item.nights} Malam</td>
+                    <td>${formatRupiah(item.price)}</td>
+                    <td><span class="badge ${item.status}">${item.status.toUpperCase()}</span></td>
+                </tr>
+            `;
+        });
     }
 
-    const adr = validBookingsCount > 0 ? (totalRev / totalNights) : 0;
+    // Top Channel
+    let topChannelName = "-";
+    let maxRev = 0;
+    for (const [ch, data] of Object.entries(channelStats)) {
+        if (data.rev > maxRev) {
+            maxRev = data.rev;
+            topChannelName = ch;
+        }
+    }
 
     document.getElementById('totalRevenue').innerText = formatRupiah(totalRev);
     document.getElementById('roomNights').innerText = totalNights + " Room Nights";
     document.getElementById('adrValue').innerText = formatRupiah(adr);
     document.getElementById('topChannel').innerText = topChannelName;
 
-    renderOTABreakdown(channelRevenue, totalRev);
-    renderAllReservations();
-}
-
-// 2. Render OTA Breakdown Page
-function renderOTABreakdown(channelRevenue, totalRev) {
+    // 2. MENU: OTA BREAKDOWN
     const otaBody = document.getElementById('otaBreakdownBody');
-    if (!otaBody) return;
-    otaBody.innerHTML = '';
+    if (otaBody) {
+        otaBody.innerHTML = '';
+        for (const [ch, data] of Object.entries(channelStats)) {
+            const share = ((data.rev / totalRev) * 100).toFixed(1);
+            const comm = data.rev * 0.15; // Komisi 15%
+            otaBody.innerHTML += `
+                <tr>
+                    <td><strong>${ch}</strong></td>
+                    <td>${data.count} Booking</td>
+                    <td>${data.nights} Malam</td>
+                    <td>${formatRupiah(data.rev)}</td>
+                    <td>${formatRupiah(comm)}</td>
+                    <td><strong>${share}%</strong></td>
+                </tr>
+            `;
+        }
+    }
 
-    for (const [channel, rev] of Object.entries(channelRevenue)) {
-        const count = bookingData.filter(b => b.channel === channel && b.status !== 'cancelled').length;
-        const percentage = totalRev > 0 ? ((rev / totalRev) * 100).toFixed(1) : 0;
+    // 3. MENU: RESERVATIONS LIST
+    const resBody = document.getElementById('allReservationsBody');
+    if (resBody) {
+        resBody.innerHTML = '';
+        bookingData.forEach(item => {
+            resBody.innerHTML += `
+                <tr>
+                    <td><strong>${item.id}</strong></td>
+                    <td>${item.guest}</td>
+                    <td><span class="channel-badge ${item.otaClass}">${item.channel}</span></td>
+                    <td>${item.room}</td>
+                    <td>${item.nights} Malam</td>
+                    <td>${formatRupiah(item.price)}</td>
+                    <td><span class="badge ${item.status}">${item.status.toUpperCase()}</span></td>
+                </tr>
+            `;
+        });
+    }
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>${channel}</strong></td>
-            <td>${count} Booking</td>
-            <td>${formatRupiah(rev)}</td>
-            <td><strong>${percentage}%</strong></td>
-        `;
-        otaBody.appendChild(row);
+    // 4. MENU: ADR & OCCUPANCY
+    const roomBody = document.getElementById('roomTypeAnalyticsBody');
+    if (roomBody) {
+        roomBody.innerHTML = '';
+        for (const [room, data] of Object.entries(roomStats)) {
+            const roomAdr = data.rev / data.nights;
+            roomBody.innerHTML += `
+                <tr>
+                    <td><strong>${room}</strong></td>
+                    <td>${data.count} Booking (${data.nights} Malam)</td>
+                    <td>${formatRupiah(data.rev)}</td>
+                    <td>${formatRupiah(roomAdr)}</td>
+                </tr>
+            `;
+        }
+    }
+
+    const revparEl = document.getElementById('revparValue');
+    if (revparEl) {
+        revparEl.innerText = formatRupiah(adr * 0.785); // 78.5% occupancy
     }
 }
 
-// 3. Render All Reservations Page
-function renderAllReservations() {
-    const resBody = document.getElementById('allReservationsBody');
-    if (!resBody) return;
-    resBody.innerHTML = '';
-
-    bookingData.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>${item.id}</strong></td>
-            <td><span class="channel-badge ${item.otaClass}">${item.channel}</span></td>
-            <td>${item.room}</td>
-            <td>${item.nights} Malam</td>
-            <td>${formatRupiah(item.price)}</td>
-            <td><span class="badge ${item.status}">${item.status.toUpperCase()}</span></td>
-        `;
-        resBody.appendChild(row);
-    });
-}
-
-// 4. Fitur Navigasi Interaktif Sidebar
+// Fitur Perpindahan Menu Sidebar (SPA Nav)
 document.addEventListener('DOMContentLoaded', () => {
-    renderDashboard();
+    renderAllPages();
 
     const navItems = document.querySelectorAll('.nav-item');
     const contentSections = document.querySelectorAll('.content-section');
@@ -134,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnRefresh) {
         btnRefresh.addEventListener('click', () => {
             alert('🔄 Sync Data OTA Berhasil!');
-            renderDashboard();
+            renderAllPages();
         });
     }
 });

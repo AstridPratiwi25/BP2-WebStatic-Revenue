@@ -85,13 +85,15 @@
         <section id="ota-section" class="content-section">
             <div class="table-container">
                 <h2>🌐 Performa & Market Share per Channel OTA</h2>
-                <p style="color:#64748b; margin-bottom: 20px; font-size:0.88rem;">Analisis kontribusi pendapatan dan pangsa pasar dari masing-masing kanal distribusi online Grand Luxury Hotel.</p>
+                <p style="color:#64748b; margin-bottom: 20px; font-size:0.88rem;">Analisis kontribusi pendapatan, komisi, dan pangsa pasar tiap OTA.</p>
                 <table>
                     <thead>
                         <tr>
                             <th>Channel Name</th>
                             <th>Jumlah Booking</th>
+                            <th>Total Room Nights</th>
                             <th>Total Revenue</th>
+                            <th>Estimasi Komisi (Avg 15%)</th>
                             <th>Market Share (%)</th>
                         </tr>
                     </thead>
@@ -109,6 +111,7 @@
                     <thead>
                         <tr>
                             <th>Booking ID</th>
+                            <th>Nama Tamu</th>
                             <th>Channel</th>
                             <th>Tipe Kamar</th>
                             <th>Durasi</th>
@@ -127,7 +130,7 @@
                 <h2>📈 Analisis ADR & Tingkat Hunian (Occupancy)</h2>
                 <p style="color:#64748b; margin-bottom:20px; font-size:0.88rem;">Performa rata-rata harga kamar dan keterisian kamar Grand Luxury Hotel.</p>
                 
-                <div class="kpi-grid">
+                <div class="kpi-grid" style="margin-bottom: 25px;">
                     <div class="card">
                         <h3>Occupancy Rate</h3>
                         <p class="value">78.5%</p>
@@ -135,7 +138,7 @@
                     </div>
                     <div class="card">
                         <h3>RevPAR</h3>
-                        <p class="value">Rp 1.413.000</p>
+                        <p class="value" id="revparValue">Rp 0</p>
                         <span class="trend positive">↑ Performa Sangat Baik</span>
                     </div>
                     <div class="card">
@@ -144,6 +147,19 @@
                         <span class="trend neutral">— Rata-rata stabil</span>
                     </div>
                 </div>
+
+                <h3>Performa Kamar Berdasarkan Tipe</h3>
+                <table style="margin-top:15px;">
+                    <thead>
+                        <tr>
+                            <th>Tipe Kamar</th>
+                            <th>Jumlah Terjual</th>
+                            <th>Total Revenue</th>
+                            <th>Rata-rata Harga (ADR)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roomTypeAnalyticsBody"></tbody>
+                </table>
             </div>
         </section>
 

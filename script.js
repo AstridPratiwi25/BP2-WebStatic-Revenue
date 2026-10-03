@@ -1,13 +1,13 @@
-// Data Simulasi Transaksi Multi-Channel OTA
+// Data Simulasi Transaksi Multi-Channel OTA untuk 1 Hotel (Grand Luxury Hotel)
 const bookingData = [
-    { id: "BK-901", channel: "Traveloka", otaClass: "ota-traveloka", hotel: "The Laguna Resort Bali", room: "Deluxe Ocean View", nights: 3, price: 6200000, status: "confirmed" },
-    { id: "BK-902", channel: "Tiket.com", otaClass: "ota-tiket", hotel: "Hotel Indonesia Kempinski", room: "Grand Deluxe King", nights: 2, price: 5400000, status: "confirmed" },
-    { id: "BK-903", channel: "Agoda", otaClass: "ota-agoda", hotel: "Alila Ubud Bali", room: "Superior Room", nights: 1, price: 1850000, status: "confirmed" },
-    { id: "BK-904", channel: "Booking.com", otaClass: "ota-booking", hotel: "Pullman Bandung Grand Central", room: "Executive Suite", nights: 2, price: 4200000, status: "confirmed" },
-    { id: "BK-905", channel: "Expedia", otaClass: "ota-expedia", hotel: "Vasa Hotel Surabaya", room: "Select Room", nights: 2, price: 2300000, status: "cancelled" },
-    { id: "BK-906", channel: "Trip.com", otaClass: "ota-trip", hotel: "Aryaduta Menteng", room: "Superior Suite", nights: 4, price: 3800000, status: "confirmed" },
-    { id: "BK-907", channel: "Direct Website", otaClass: "ota-website", hotel: "Padma Hotel Bandung", room: "Premier Balcony", nights: 2, price: 4900000, status: "confirmed" },
-    { id: "BK-908", channel: "Traveloka", otaClass: "ota-traveloka", hotel: "Jwaneng Hotel Jogja", room: "Standard Double", nights: 1, price: 650000, status: "pending" }
+    { id: "BK-901", channel: "Traveloka", otaClass: "ota-traveloka", room: "Deluxe Ocean View", nights: 3, price: 4500000, status: "confirmed" },
+    { id: "BK-902", channel: "Tiket.com", otaClass: "ota-tiket", room: "Grand Deluxe King", nights: 2, price: 3200000, status: "confirmed" },
+    { id: "BK-903", channel: "Agoda", otaClass: "ota-agoda", room: "Superior Room", nights: 1, price: 1200000, status: "confirmed" },
+    { id: "BK-904", channel: "Booking.com", otaClass: "ota-booking", room: "Executive Suite", nights: 2, price: 5000000, status: "confirmed" },
+    { id: "BK-905", channel: "Expedia", otaClass: "ota-expedia", room: "Deluxe Ocean View", nights: 2, price: 3000000, status: "cancelled" },
+    { id: "BK-906", channel: "Trip.com", otaClass: "ota-trip", room: "Superior Room", nights: 4, price: 4800000, status: "confirmed" },
+    { id: "BK-907", channel: "Direct Website", otaClass: "ota-website", room: "Presidential Suite", nights: 2, price: 8500000, status: "confirmed" },
+    { id: "BK-908", channel: "Traveloka", otaClass: "ota-traveloka", room: "Superior Room", nights: 1, price: 1200000, status: "pending" }
 ];
 
 // Helper Format Rupiah
@@ -39,7 +39,6 @@ function renderDashboard() {
         row.innerHTML = `
             <td><strong>${item.id}</strong></td>
             <td><span class="channel-badge ${item.otaClass}">${item.channel}</span></td>
-            <td>${item.hotel}</td>
             <td>${item.room}</td>
             <td>${item.nights} Malam</td>
             <td>${formatRupiah(item.price)}</td>
@@ -70,7 +69,7 @@ function renderDashboard() {
 
 // Button Sync/Refresh Event
 document.getElementById('btnRefresh').addEventListener('click', () => {
-    alert('🔄 Sinkronisasi data real-time dengan Traveloka, Tiket, Agoda, Booking, Expedia, Trip.com & Website berhasil!');
+    alert('🔄 Sinkronisasi data reservasi Grand Luxury Hotel dengan seluruh OTA berhasil!');
     renderDashboard();
 });
 

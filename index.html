@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel Revenue Dashboard - Multi-OTA Ecommerce</title>
+    <title>Grand Luxury Hotel - Revenue & OTA Analytics</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -12,14 +12,13 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
         <div class="brand">
-            <h2>RevenueHub <span>Multi-OTA</span></h2>
+            <h2>Grand Luxury <span>Hotel</span></h2>
         </div>
         <nav class="nav-menu">
             <a href="#" class="active">📊 Overview Dashboard</a>
-            <a href="#">🏨 Hotel Performance</a>
-            <a href="#">🌐 Channel Distribution</a>
+            <a href="#">🌐 OTA Breakdown</a>
             <a href="#">💳 Reservations List</a>
-            <a href="#">📈 ADR & RevPAR Analytics</a>
+            <a href="#">📈 ADR & Occupancy</a>
             <a href="#">⚙️ Settings</a>
         </nav>
     </aside>
@@ -28,8 +27,8 @@
     <main class="main-content">
         <header class="topbar">
             <div>
-                <h1>Hotel Revenue & Channel Dashboard</h1>
-                <p>Monitoring performa penjualan dari Traveloka, Agoda, Booking.com, Tiket.com, Expedia, Trip.com & Direct Website.</p>
+                <h1>Grand Luxury Hotel & Resort</h1>
+                <p>Dashboard Analisis Revenue & Penjualan Multi-Channel OTA (Traveloka, Agoda, Booking.com, Tiket.com, dll.)</p>
             </div>
             <div class="user-profile">
                 <span>Halo, <strong>Revenue Manager</strong></span>
@@ -39,7 +38,7 @@
         <!-- KPI Summary Cards -->
         <section class="kpi-grid">
             <div class="card">
-                <h3>Total Revenue All Channels</h3>
+                <h3>Total Revenue Hotel</h3>
                 <p class="value" id="totalRevenue">Rp 0</p>
                 <span class="trend positive">↑ +14.2% vs bulan lalu</span>
             </div>
@@ -54,7 +53,7 @@
                 <span class="trend neutral">— Stabil</span>
             </div>
             <div class="card">
-                <h3>Top Channel Revenue</h3>
+                <h3>Top Performing Channel</h3>
                 <p class="value" id="topChannel">-</p>
                 <span class="trend positive">Kontributor Terbesar</span>
             </div>
@@ -63,7 +62,7 @@
         <!-- Recent Reservations Table -->
         <section class="table-container">
             <div class="table-header">
-                <h2>Transaksi Booking Terkini (By Channel)</h2>
+                <h2>Rincian Transaksi Booking per Channel OTA</h2>
                 <button id="btnRefresh" class="btn-primary">🔄 Sync Data OTA</button>
             </div>
             <table>
@@ -71,9 +70,8 @@
                     <tr>
                         <th>Booking ID</th>
                         <th>OTA / Channel</th>
-                        <th>Nama Hotel</th>
                         <th>Tipe Kamar</th>
-                        <th>Malam</th>
+                        <th>Durasi (Malam)</th>
                         <th>Total Revenue</th>
                         <th>Status</th>
                     </tr>

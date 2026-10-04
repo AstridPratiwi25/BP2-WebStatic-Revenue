@@ -9,10 +9,15 @@
 </head>
 <body>
 
+    <!-- Overlay Gelap saat Sidebar Mobile Terbuka -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Sidebar Navigation -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="brand">
             <h2>Grand Luxury <span>Hotel</span></h2>
+            <!-- Tombol Close (✕) khusus tampilan Mobile -->
+            <button class="close-sidebar-btn" id="closeSidebarBtn" aria-label="Close Menu">✕</button>
         </div>
         <nav class="nav-menu">
             <a href="#" class="nav-item active" data-target="overview-section">📊 Overview Dashboard</a>
@@ -26,9 +31,13 @@
     <!-- Main Content Area -->
     <main class="main-content">
         <header class="topbar">
-            <div>
-                <h1>Grand Luxury Hotel & Resort</h1>
-                <p>Dashboard Analisis Revenue & Penjualan Multi-Channel OTA</p>
+            <div class="topbar-left">
+                <!-- Tombol Burger Menu (☰) untuk Mobile -->
+                <button class="mobile-toggle" id="mobileToggleBtn" aria-label="Open Menu">☰</button>
+                <div>
+                    <h1>Grand Luxury Hotel & Resort</h1>
+                    <p>Dashboard Analisis Revenue & Penjualan Multi-Channel OTA</p>
+                </div>
             </div>
             <div class="user-profile">
                 <span>Halo, <strong>Astrid (Revenue Analyst)</strong></span>
@@ -65,19 +74,21 @@
                     <h2>Rincian Transaksi Booking per Channel OTA</h2>
                     <button id="btnRefresh" class="btn-primary">🔄 Sync Data OTA</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Booking ID</th>
-                            <th>OTA / Channel</th>
-                            <th>Tipe Kamar</th>
-                            <th>Durasi</th>
-                            <th>Total Revenue</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bookingTableBody"></tbody>
-                </table>
+                <div class="responsive-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>OTA / Channel</th>
+                                <th>Tipe Kamar</th>
+                                <th>Durasi</th>
+                                <th>Total Revenue</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -86,19 +97,21 @@
             <div class="table-container">
                 <h2>🌐 Performa & Market Share per Channel OTA</h2>
                 <p style="color:#64748b; margin-bottom: 20px; font-size:0.88rem;">Analisis kontribusi pendapatan, komisi, dan pangsa pasar tiap OTA.</p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Channel Name</th>
-                            <th>Jumlah Booking</th>
-                            <th>Total Room Nights</th>
-                            <th>Total Revenue</th>
-                            <th>Estimasi Komisi (Avg 15%)</th>
-                            <th>Market Share (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="otaBreakdownBody"></tbody>
-                </table>
+                <div class="responsive-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Channel Name</th>
+                                <th>Jumlah Booking</th>
+                                <th>Total Room Nights</th>
+                                <th>Total Revenue</th>
+                                <th>Estimasi Komisi (Avg 15%)</th>
+                                <th>Market Share (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="otaBreakdownBody"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -107,20 +120,22 @@
             <div class="table-container">
                 <h2>💳 Daftar Lengkap Reservasi Kamar</h2>
                 <p style="color:#64748b; margin-bottom: 20px; font-size:0.88rem;">Semua riwayat transaksi reservasi tamu dari seluruh OTA & Direct Booking.</p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Booking ID</th>
-                            <th>Nama Tamu</th>
-                            <th>Channel</th>
-                            <th>Tipe Kamar</th>
-                            <th>Durasi</th>
-                            <th>Total Price</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="allReservationsBody"></tbody>
-                </table>
+                <div class="responsive-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Nama Tamu</th>
+                                <th>Channel</th>
+                                <th>Tipe Kamar</th>
+                                <th>Durasi</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allReservationsBody"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -149,17 +164,19 @@
                 </div>
 
                 <h3>Performa Kamar Berdasarkan Tipe</h3>
-                <table style="margin-top:15px;">
-                    <thead>
-                        <tr>
-                            <th>Tipe Kamar</th>
-                            <th>Jumlah Terjual</th>
-                            <th>Total Revenue</th>
-                            <th>Rata-rata Harga (ADR)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="roomTypeAnalyticsBody"></tbody>
-                </table>
+                <div class="responsive-table-wrapper" style="margin-top:15px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipe Kamar</th>
+                                <th>Jumlah Terjual</th>
+                                <th>Total Revenue</th>
+                                <th>Rata-rata Harga (ADR)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomTypeAnalyticsBody"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -169,7 +186,7 @@
                 <h2>⚙️ Pengaturan Akun & Properti Hotel</h2>
                 <p style="color:#64748b; margin-bottom:20px; font-size:0.88rem;">Kelola informasi properti dan profil akun Revenue Analyst.</p>
                 
-                <form style="display:flex; flex-direction:column; gap:16px; max-width:450px;">
+                <form style="display:flex; flex-direction:column; gap:16px; max-width:100%;">
                     <div>
                         <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Nama Properti Hotel</label>
                         <input type="text" value="Grand Luxury Hotel & Resort" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;">

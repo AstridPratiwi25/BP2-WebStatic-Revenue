@@ -1,4 +1,4 @@
-// Data Simulasi Transaksi Multi-Channel OTA untuk Grand Luxury Hotel
+// Data Simulasi Transaksi Multi-Channel OTA
 const bookingData = [
     { id: "BK-901", guest: "Budi Santoso", channel: "Traveloka", otaClass: "ota-traveloka", room: "Deluxe Ocean View", nights: 3, price: 4500000, status: "confirmed" },
     { id: "BK-902", guest: "Siti Rahma", channel: "Tiket.com", otaClass: "ota-tiket", room: "Grand Deluxe King", nights: 2, price: 3200000, status: "confirmed" },
@@ -15,7 +15,7 @@ function formatRupiah(number) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
 }
 
-// Render Semua Menu
+// Render Semua Menu & Data
 function renderAllPages() {
     let totalRev = 0;
     let totalNights = 0;
@@ -23,14 +23,12 @@ function renderAllPages() {
     const channelStats = {};
     const roomStats = {};
 
-    // Hitung statistik
     bookingData.forEach(item => {
         if (item.status !== 'cancelled') {
             totalRev += item.price;
             totalNights += item.nights;
             validBookingsCount++;
 
-            // Channel stats
             if (!channelStats[item.channel]) {
                 channelStats[item.channel] = { count: 0, nights: 0, rev: 0 };
             }
@@ -38,7 +36,6 @@ function renderAllPages() {
             channelStats[item.channel].nights += item.nights;
             channelStats[item.channel].rev += item.price;
 
-            // Room stats
             if (!roomStats[item.room]) {
                 roomStats[item.room] = { count: 0, rev: 0, nights: 0 };
             }
@@ -50,7 +47,7 @@ function renderAllPages() {
 
     const adr = validBookingsCount > 0 ? (totalRev / totalNights) : 0;
 
-    // 1. MENU: OVERVIEW
+    // 1. OVERVIEW
     const overviewBody = document.getElementById('bookingTableBody');
     if (overviewBody) {
         overviewBody.innerHTML = '';
@@ -68,7 +65,6 @@ function renderAllPages() {
         });
     }
 
-    // Top Channel
     let topChannelName = "-";
     let maxRev = 0;
     for (const [ch, data] of Object.entries(channelStats)) {
@@ -83,13 +79,13 @@ function renderAllPages() {
     document.getElementById('adrValue').innerText = formatRupiah(adr);
     document.getElementById('topChannel').innerText = topChannelName;
 
-    // 2. MENU: OTA BREAKDOWN
+    // 2. OTA BREAKDOWN
     const otaBody = document.getElementById('otaBreakdownBody');
     if (otaBody) {
         otaBody.innerHTML = '';
         for (const [ch, data] of Object.entries(channelStats)) {
             const share = ((data.rev / totalRev) * 100).toFixed(1);
-            const comm = data.rev * 0.15; // Komisi 15%
+            const comm = data.rev * 0.15;
             otaBody.innerHTML += `
                 <tr>
                     <td><strong>${ch}</strong></td>
@@ -103,7 +99,7 @@ function renderAllPages() {
         }
     }
 
-    // 3. MENU: RESERVATIONS LIST
+    // 3. RESERVATIONS LIST
     const resBody = document.getElementById('allReservationsBody');
     if (resBody) {
         resBody.innerHTML = '';
@@ -122,7 +118,7 @@ function renderAllPages() {
         });
     }
 
-    // 4. MENU: ADR & OCCUPANCY
+    // 4. ADR & OCCUPANCY
     const roomBody = document.getElementById('roomTypeAnalyticsBody');
     if (roomBody) {
         roomBody.innerHTML = '';
@@ -141,13 +137,38 @@ function renderAllPages() {
 
     const revparEl = document.getElementById('revparValue');
     if (revparEl) {
-        revparEl.innerText = formatRupiah(adr * 0.785); // 78.5% occupancy
+        revparEl.innerText = formatRupiah(adr * 0.785);
     }
 }
 
-// Fitur Perpindahan Menu Sidebar (SPA Nav)
+// Mobile Sidebar Controls
+function setupMobileSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const mobileToggleBtn = document.getElementById('mobileToggleBtn');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+    function openSidebar() {
+        sidebar.classList.add('show');
+        overlay.classList.add('active');
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('active');
+    }
+
+    if (mobileToggleBtn) mobileToggleBtn.addEventListener('click', openSidebar);
+    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+    if (overlay) overlay.addEventListener('click', closeSidebar);
+
+    return closeSidebar;
+}
+
+// Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     renderAllPages();
+    const closeSidebar = setupMobileSidebar();
 
     const navItems = document.querySelectorAll('.nav-item');
     const contentSections = document.querySelectorAll('.content-section');
@@ -165,6 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetSection) {
                 targetSection.classList.add('active-section');
             }
+
+            // Otomatis Sembunyikan Sidebar Setelah Menu Diklik (Mobile)
+            closeSidebar();
         });
     });
 

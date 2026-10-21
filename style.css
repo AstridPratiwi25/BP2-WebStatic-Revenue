@@ -1,338 +1,93 @@
-/* Reset Basic */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
+:root {
+    --sidebar-width: 260px;
+    --gold-accent: #d4af37;
 }
 
 body {
-    display: flex;
-    background-color: #f8fafc;
-    color: #1e293b;
-    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
 }
 
-/* Sidebar Styles */
 .sidebar {
-    width: 260px;
-    background-color: #0f172a;
-    color: #ffffff;
-    padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
+    width: var(--sidebar-width);
     position: fixed;
-    height: 100vh;
-    left: 0;
     top: 0;
+    left: 0;
+    height: 100vh;
     z-index: 1000;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
 }
 
-.brand {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    padding: 0 8px;
-}
-
-.brand h2 {
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.brand h2 span {
-    color: #38bdf8;
-}
-
-.close-sidebar-btn {
-    display: none; /* Hanya muncul di Mobile */
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-.close-sidebar-btn:hover {
-    color: #ffffff;
-}
-
-.nav-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.nav-item {
-    color: #94a3b8;
-    text-decoration: none;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.nav-item:hover, .nav-item.active {
-    background-color: #1e293b;
-    color: #38bdf8;
-}
-
-/* Main Content Styles */
 .main-content {
-    margin-left: 260px;
-    flex: 1;
-    padding: 28px;
-    width: calc(100% - 260px);
+    margin-left: var(--sidebar-width);
+    transition: all 0.3s ease;
 }
 
-.topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 28px;
-}
-
-.topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.mobile-toggle {
-    display: none; /* Hanya muncul di Mobile */
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 1.25rem;
-    cursor: pointer;
-    color: #0f172a;
-}
-
-.topbar h1 {
-    font-size: 1.5rem;
+.brand-title h5 {
+    letter-spacing: 1px;
     font-weight: 700;
 }
 
-.topbar p {
-    color: #64748b;
-    font-size: 0.88rem;
-}
-
-.user-profile {
-    font-size: 0.88rem;
-    background-color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-/* Sections */
-.content-section {
-    display: none;
-}
-
-.content-section.active-section {
-    display: block;
-}
-
-/* KPI Cards */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
-}
-
-.card {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-}
-
-.card h3 {
-    font-size: 0.82rem;
-    color: #64748b;
-    text-transform: uppercase;
+.text-gold {
+    color: var(--gold-accent);
+    font-weight: 600;
     letter-spacing: 0.5px;
-    margin-bottom: 8px;
 }
 
-.card .value {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 6px;
-}
-
-.card .trend {
-    font-size: 0.78rem;
-    font-weight: 600;
-}
-
-.trend.positive { color: #16a34a; }
-.trend.neutral { color: #64748b; }
-
-/* Table Container & Responsiveness */
-.table-container {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    padding: 24px;
-}
-
-.table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.table-header h2 {
-    font-size: 1.1rem;
-}
-
-.btn-primary {
-    background-color: #0284c7;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: background 0.2s ease;
-}
-
-.btn-primary:hover {
-    background-color: #0369a1;
-}
-
-/* Scrollable Table for Mobile */
-.responsive-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 0.88rem;
-    min-width: 600px; /* Menjaga agar tabel tidak terdistorsi di HP */
-}
-
-th, td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-th {
-    background-color: #f8fafc;
-    color: #64748b;
-    font-weight: 600;
-}
-
-/* Channel & Status Badges */
+/* Channel Badge Custom Styling */
 .channel-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.ota-traveloka { background: #e0f2fe; color: #0284c7; }
-.ota-tiket { background: #fef3c7; color: #d97706; }
-.ota-agoda { background: #dcfce7; color: #15803d; }
-.ota-booking { background: #dbeafe; color: #1d4ed8; }
-.ota-expedia { background: #fae8ff; color: #a21caf; }
-.ota-trip { background: #fce7f3; color: #be185d; }
-.ota-website { background: #f1f5f9; color: #334155; }
-
-.badge {
-    display: inline-block;
-    padding: 4px 8px;
+    padding: 4px 10px;
     border-radius: 12px;
-    font-size: 0.72rem;
+    font-size: 0.8rem;
     font-weight: 600;
+    color: #fff;
+}
+.ota-traveloka { background-color: #1ba0e2; }
+.ota-tiket { background-color: #00529c; }
+.ota-agoda { background-color: #586673; }
+.ota-booking { background-color: #003580; }
+.ota-expedia { background-color: #ffcc00; color: #000; }
+.ota-trip { background-color: #2577e3; }
+.ota-website { background-color: #28a745; }
+
+/* Status Badge Styling */
+.badge.confirmed { background-color: #198754; }
+.badge.cancelled { background-color: #dc3545; }
+.badge.pending { background-color: #ffc107; color: #000; }
+
+.nav-link {
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 4px;
 }
 
-.badge.confirmed { background: #dcfce7; color: #166534; }
-.badge.cancelled { background: #fee2e2; color: #991b1b; }
-.badge.pending { background: #fef3c7; color: #92400e; }
-
-/* Overlay Background */
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(15, 23, 42, 0.5);
-    z-index: 999;
+.nav-link:hover, .nav-link.active {
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
-.sidebar-overlay.active {
-    display: block;
-}
-
-/* ===================================================
-   RESPONSIVE MOBILE STYLES (Screen Width < 768px)
-   =================================================== */
-@media screen and (max-width: 768px) {
-    /* Hide Sidebar By Default in Mobile */
+/* Responsive Mobile Sidebar */
+@media (max-width: 768px) {
     .sidebar {
-        transform: translateX(-100%);
-        box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+        margin-left: calc(-1 * var(--sidebar-width));
     }
-
-    /* Show Sidebar when active */
     .sidebar.show {
-        transform: translateX(0);
+        margin-left: 0;
     }
-
-    .close-sidebar-btn {
-        display: block;
-    }
-
-    .mobile-toggle {
-        display: block;
-    }
-
     .main-content {
         margin-left: 0;
-        width: 100%;
-        padding: 16px;
     }
-
-    .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
     }
-
-    .topbar h1 {
-        font-size: 1.2rem;
-    }
-
-    .topbar p {
-        font-size: 0.78rem;
-    }
-
-    .table-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .kpi-grid {
-        grid-template-columns: 1fr;
+    .sidebar-overlay.active {
+        display: block;
     }
 }

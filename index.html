@@ -3,86 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grand Luxury Hotel - Revenue & OTA Analytics</title>
+    <title>Villa & Sanctuary by Astrid - Revenue Management & Analytics</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- Overlay Gelap saat Sidebar Mobile Terbuka -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <!-- Overlay Mobile -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
     <!-- Sidebar Navigation -->
-    <aside class="sidebar" id="sidebar">
-        <div class="brand">
-            <h2>Grand Luxury <span>Hotel</span></h2>
-            <!-- Tombol Close (✕) khusus tampilan Mobile -->
-            <button class="close-sidebar-btn" id="closeSidebarBtn" aria-label="Close Menu">✕</button>
+    <nav id="sidebar" class="bg-dark text-white p-3 sidebar">
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+            <div class="brand-title">
+                <h5 class="text-white mb-0">Villa & Sanctuary</h5>
+                <span class="text-gold">by Astrid</span>
+            </div>
+            <button id="closeSidebarBtn" class="btn text-white d-md-none">&times;</button>
         </div>
-        <nav class="nav-menu">
-            <a href="#" class="nav-item active" data-target="overview-section">📊 Overview Dashboard</a>
-            <a href="#" class="nav-item" data-target="ota-section">🌐 OTA Breakdown</a>
-            <a href="#" class="nav-item" data-target="reservations-section">💳 Reservations List</a>
-            <a href="#" class="nav-item" data-target="analytics-section">📈 ADR & Occupancy</a>
-            <a href="#" class="nav-item" data-target="settings-section">⚙️ Settings</a>
-        </nav>
-    </aside>
+        
+        <hr class="border-secondary mb-4">
 
-    <!-- Main Content Area -->
-    <main class="main-content">
-        <header class="topbar">
-            <div class="topbar-left">
-                <!-- Tombol Burger Menu (☰) untuk Mobile -->
-                <button class="mobile-toggle" id="mobileToggleBtn" aria-label="Open Menu">☰</button>
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item" data-target="overviewSection">
+                <a href="#" class="nav-link active">📊 Overview</a>
+            </li>
+            <li class="nav-item" data-target="otaBreakdownSection">
+                <a href="#" class="nav-link">🌐 OTA Breakdown</a>
+            </li>
+            <li class="nav-item" data-target="reservationsSection">
+                <a href="#" class="nav-link">📋 All Reservations</a>
+            </li>
+            <li class="nav-item" data-target="roomAnalyticsSection">
+                <a href="#" class="nav-link">🛏 Room Analytics</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content p-4">
+        <!-- Header Topbar -->
+        <header class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-3">
+                <button id="mobileToggleBtn" class="btn btn-outline-dark d-md-none">☰ Menu</button>
                 <div>
-                    <h1>Grand Luxury Hotel & Resort</h1>
-                    <p>Dashboard Analisis Revenue & Penjualan Multi-Channel OTA</p>
+                    <h2 class="h4 mb-0 fw-bold">Revenue Management & Analytics</h2>
+                    <small class="text-muted">Villa & Sanctuary by Astrid • Revenue System</small>
                 </div>
             </div>
-            <div class="user-profile">
-                <span>Halo, <strong>Astrid (Revenue Analyst)</strong></span>
-            </div>
+            <button id="btnRefresh" class="btn btn-primary shadow-sm">🔄 Sync Data OTA</button>
         </header>
 
-        <!-- 1. OVERVIEW DASHBOARD SECTION -->
-        <section id="overview-section" class="content-section active-section">
-            <div class="kpi-grid">
-                <div class="card">
-                    <h3>Total Revenue Hotel</h3>
-                    <p class="value" id="totalRevenue">Rp 0</p>
-                    <span class="trend positive">↑ +14.2% vs bulan lalu</span>
-                </div>
-                <div class="card">
-                    <h3>Total Room Nights</h3>
-                    <p class="value" id="roomNights">0</p>
-                    <span class="trend positive">↑ +9.5% vs bulan lalu</span>
-                </div>
-                <div class="card">
-                    <h3>Average Daily Rate (ADR)</h3>
-                    <p class="value" id="adrValue">Rp 0</p>
-                    <span class="trend neutral">— Stabil</span>
-                </div>
-                <div class="card">
-                    <h3>Top Performing Channel</h3>
-                    <p class="value" id="topChannel">-</p>
-                    <span class="trend positive">Kontributor Terbesar</span>
+        <!-- Top Metrics Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card card-body border-0 shadow-sm">
+                    <small class="text-muted font-weight-bold">Total Revenue</small>
+                    <h4 id="totalRevenue" class="text-success fw-bold mb-0">Rp 0</h4>
                 </div>
             </div>
-
-            <div class="table-container">
-                <div class="table-header">
-                    <h2>Rincian Transaksi Booking per Channel OTA</h2>
-                    <button id="btnRefresh" class="btn-primary">🔄 Sync Data OTA</button>
+            <div class="col-md-3">
+                <div class="card card-body border-0 shadow-sm">
+                    <small class="text-muted font-weight-bold">Total Room Nights</small>
+                    <h4 id="roomNights" class="text-dark fw-bold mb-0">0 Room Nights</h4>
                 </div>
-                <div class="responsive-table-wrapper">
-                    <table>
-                        <thead>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-body border-0 shadow-sm">
+                    <small class="text-muted font-weight-bold">ADR (Average Daily Rate)</small>
+                    <h4 id="adrValue" class="text-info fw-bold mb-0">Rp 0</h4>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-body border-0 shadow-sm">
+                    <small class="text-muted font-weight-bold">Top Channel</small>
+                    <h4 id="topChannel" class="text-warning fw-bold mb-0">-</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. OVERVIEW SECTION -->
+        <section id="overviewSection" class="content-section">
+            <div class="card border-0 shadow-sm p-3">
+                <h5 class="card-title mb-3">Overview Recent Bookings</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <th>Booking ID</th>
-                                <th>OTA / Channel</th>
+                                <th>ID</th>
+                                <th>Channel</th>
                                 <th>Tipe Kamar</th>
                                 <th>Durasi</th>
-                                <th>Total Revenue</th>
+                                <th>Total Harga</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -93,20 +106,19 @@
         </section>
 
         <!-- 2. OTA BREAKDOWN SECTION -->
-        <section id="ota-section" class="content-section">
-            <div class="table-container">
-                <h2>🌐 Performa & Market Share per Channel OTA</h2>
-                <p style="color:#64748b; margin-bottom: 20px; font-size:0.88rem;">Analisis kontribusi pendapatan, komisi, dan pangsa pasar tiap OTA.</p>
-                <div class="responsive-table-wrapper">
-                    <table>
-                        <thead>
+        <section id="otaBreakdownSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-3">
+                <h5 class="card-title mb-3">OTA Performance Breakdown</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <th>Channel Name</th>
+                                <th>Channel</th>
                                 <th>Jumlah Booking</th>
-                                <th>Total Room Nights</th>
-                                <th>Total Revenue</th>
-                                <th>Estimasi Komisi (Avg 15%)</th>
-                                <th>Market Share (%)</th>
+                                <th>Room Nights</th>
+                                <th>Gross Revenue</th>
+                                <th>Est. Komisi (15%)</th>
+                                <th>Share (%)</th>
                             </tr>
                         </thead>
                         <tbody id="otaBreakdownBody"></tbody>
@@ -116,20 +128,19 @@
         </section>
 
         <!-- 3. RESERVATIONS LIST SECTION -->
-        <section id="reservations-section" class="content-section">
-            <div class="table-container">
-                <h2>💳 Daftar Lengkap Reservasi Kamar</h2>
-                <p style="color:#64748b; margin-bottom: 20px; font-size:0.88rem;">Semua riwayat transaksi reservasi tamu dari seluruh OTA & Direct Booking.</p>
-                <div class="responsive-table-wrapper">
-                    <table>
-                        <thead>
+        <section id="reservationsSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-3">
+                <h5 class="card-title mb-3">Master Reservations List</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <th>Booking ID</th>
-                                <th>Nama Tamu</th>
+                                <th>ID</th>
+                                <th>Tamu</th>
                                 <th>Channel</th>
-                                <th>Tipe Kamar</th>
-                                <th>Durasi</th>
-                                <th>Total Price</th>
+                                <th>Kamar</th>
+                                <th>Malam</th>
+                                <th>Harga</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -139,39 +150,19 @@
             </div>
         </section>
 
-        <!-- 4. ADR & OCCUPANCY SECTION -->
-        <section id="analytics-section" class="content-section">
-            <div class="table-container">
-                <h2>📈 Analisis ADR & Tingkat Hunian (Occupancy)</h2>
-                <p style="color:#64748b; margin-bottom:20px; font-size:0.88rem;">Performa rata-rata harga kamar dan keterisian kamar Grand Luxury Hotel.</p>
-                
-                <div class="kpi-grid" style="margin-bottom: 25px;">
-                    <div class="card">
-                        <h3>Occupancy Rate</h3>
-                        <p class="value">78.5%</p>
-                        <span class="trend positive">↑ +5% dari target</span>
-                    </div>
-                    <div class="card">
-                        <h3>RevPAR</h3>
-                        <p class="value" id="revparValue">Rp 0</p>
-                        <span class="trend positive">↑ Performa Sangat Baik</span>
-                    </div>
-                    <div class="card">
-                        <h3>ALOS (Avg Length of Stay)</h3>
-                        <p class="value">2.1 Malam</p>
-                        <span class="trend neutral">— Rata-rata stabil</span>
-                    </div>
-                </div>
-
-                <h3>Performa Kamar Berdasarkan Tipe</h3>
-                <div class="responsive-table-wrapper" style="margin-top:15px;">
-                    <table>
-                        <thead>
+        <!-- 4. ROOM ANALYTICS SECTION -->
+        <section id="roomAnalyticsSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-3">
+                <h5 class="card-title mb-3">Room Type Analytics & RevPAR</h5>
+                <p>Est. RevPAR (Occ 78.5%): <strong id="revparValue" class="text-primary">Rp 0</strong></p>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
                             <tr>
                                 <th>Tipe Kamar</th>
-                                <th>Jumlah Terjual</th>
-                                <th>Total Revenue</th>
-                                <th>Rata-rata Harga (ADR)</th>
+                                <th>Total Booked</th>
+                                <th>Revenue</th>
+                                <th>Average ADR</th>
                             </tr>
                         </thead>
                         <tbody id="roomTypeAnalyticsBody"></tbody>
@@ -179,33 +170,10 @@
                 </div>
             </div>
         </section>
+    </div>
 
-        <!-- 5. SETTINGS SECTION -->
-        <section id="settings-section" class="content-section">
-            <div class="table-container">
-                <h2>⚙️ Pengaturan Akun & Properti Hotel</h2>
-                <p style="color:#64748b; margin-bottom:20px; font-size:0.88rem;">Kelola informasi properti dan profil akun Revenue Analyst.</p>
-                
-                <form style="display:flex; flex-direction:column; gap:16px; max-width:100%;">
-                    <div>
-                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Nama Properti Hotel</label>
-                        <input type="text" value="Grand Luxury Hotel & Resort" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;">
-                    </div>
-                    <div>
-                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Nama Revenue Analyst</label>
-                        <input type="text" value="Astrid Pratiwi" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;">
-                    </div>
-                    <div>
-                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Email Otorisasi Sync</label>
-                        <input type="email" value="astrdpratiwi@gmail.com" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;">
-                    </div>
-                    <button type="button" class="btn-primary" style="width:fit-content; margin-top:5px;">Simpan Perubahan</button>
-                </form>
-            </div>
-        </section>
-
-    </main>
-
+    <!-- Bootstrap JS & Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

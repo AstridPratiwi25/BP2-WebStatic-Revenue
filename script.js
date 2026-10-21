@@ -177,17 +177,16 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
 
-            navItems.forEach(nav => nav.classList.remove('active'));
-            contentSections.forEach(section => section.classList.remove('active-section'));
+            navItems.forEach(nav => nav.querySelector('.nav-link').classList.remove('active'));
+            contentSections.forEach(section => section.classList.add('d-none'));
 
-            item.classList.add('active');
+            item.querySelector('.nav-link').classList.add('active');
             const targetId = item.getAttribute('data-target');
             const targetSection = document.getElementById(targetId);
             if (targetSection) {
-                targetSection.classList.add('active-section');
+                targetSection.classList.remove('d-none');
             }
 
-            // Otomatis Sembunyikan Sidebar Setelah Menu Diklik (Mobile)
             closeSidebar();
         });
     });

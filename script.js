@@ -99,24 +99,8 @@ function renderAllPages() {
         }
     }
 
-    // 3. RESERVATIONS LIST
-    const resBody = document.getElementById('allReservationsBody');
-    if (resBody) {
-        resBody.innerHTML = '';
-        bookingData.forEach(item => {
-            resBody.innerHTML += `
-                <tr>
-                    <td><strong>${item.id}</strong></td>
-                    <td>${item.guest}</td>
-                    <td><span class="channel-badge ${item.otaClass}">${item.channel}</span></td>
-                    <td>${item.room}</td>
-                    <td>${item.nights} Malam</td>
-                    <td>${formatRupiah(item.price)}</td>
-                    <td><span class="badge ${item.status}">${item.status.toUpperCase()}</span></td>
-                </tr>
-            `;
-        });
-    }
+   // 3. RESERVATIONS LIST
+renderReservations();
 
     // 4. ADR & OCCUPANCY
     const roomBody = document.getElementById('roomTypeAnalyticsBody');
@@ -139,6 +123,75 @@ function renderAllPages() {
     if (revparEl) {
         revparEl.innerText = formatRupiah(adr * 0.785);
     }
+}
+
+// RESERVATION SEARCH & FILTER
+function renderReservations() {
+
+    const resBody = document.getElementById('allReservationsBody');
+
+    if (!resBody) return;
+
+    const searchInput = document.getElementById('searchReservation');
+    const channelFilter = document.getElementById('filterChannel');
+    const statusFilter = document.getElementById('filterStatus');
+
+    const keyword = searchInput.value.toLowerCase();
+    const selectedChannel = channelFilter.value;
+    const selectedStatus = statusFilter.value;
+
+    const filteredData = bookingData.filter(item => {
+
+        const matchSearch =
+            item.id.toLowerCase().includes(keyword) ||
+            item.guest.toLowerCase().includes(keyword);
+
+        const matchChannel =
+            selectedChannel === '' ||
+            item.channel === selectedChannel;
+
+        const matchStatus =
+            selectedStatus === '' ||
+            item.status === selectedStatus;
+
+        return matchSearch && matchChannel && matchStatus;
+    });
+
+    resBody.innerHTML = '';
+
+    if (filteredData.length === 0) {
+        resBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-muted py-4">
+                    No reservations found.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    filteredData.forEach(item => {
+
+        resBody.innerHTML += `
+            <tr>
+                <td><strong>${item.id}</strong></td>
+                <td>${item.guest}</td>
+                <td>
+                    <span class="channel-badge ${item.otaClass}">
+                        ${item.channel}
+                    </span>
+                </td>
+                <td>${item.room}</td>
+                <td>${item.nights} Malam</td>
+                <td>${formatRupiah(item.price)}</td>
+                <td>
+                    <span class="badge ${item.status}">
+                        ${item.status.toUpperCase()}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
 }
 
 // Mobile Sidebar Controls
@@ -168,6 +221,25 @@ function setupMobileSidebar() {
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     renderAllPages();
+    // SEARCH & FILTER EVENTS
+const searchReservation = document.getElementById('searchReservation');
+const filterChannel = document.getElementById('filterChannel');
+const filterStatus = document.getElementById('filterStatus');
+const resetFilter = document.getElementById('resetFilter');
+
+searchReservation.addEventListener('input', renderReservations);
+
+filterChannel.addEventListener('change', renderReservations);
+
+filterStatus.addEventListener('change', renderReservations);
+
+resetFilter.addEventListener('click', () => {
+    searchReservation.value = '';
+    filterChannel.value = '';
+    filterStatus.value = '';
+
+    renderReservations();
+});
     const closeSidebar = setupMobileSidebar();
 
     const navItems = document.querySelectorAll('.nav-item');

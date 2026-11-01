@@ -131,6 +131,47 @@
         <section id="reservationsSection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-3">
                 <h5 class="card-title mb-3">Master Reservations List</h5>
+
+<div class="row g-2 mb-3">
+
+    <div class="col-md-5">
+        <input
+            type="text"
+            id="searchReservation"
+            class="form-control"
+            placeholder="Search Guest Name or Booking ID..."
+        >
+    </div>
+
+    <div class="col-md-3">
+        <select id="filterChannel" class="form-select">
+            <option value="">All Channels</option>
+            <option value="Traveloka">Traveloka</option>
+            <option value="Tiket.com">Tiket.com</option>
+            <option value="Agoda">Agoda</option>
+            <option value="Booking.com">Booking.com</option>
+            <option value="Expedia">Expedia</option>
+            <option value="Trip.com">Trip.com</option>
+            <option value="Direct Website">Direct Website</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select id="filterStatus" class="form-select">
+            <option value="">All Status</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+    </div>
+
+    <div class="col-md-1">
+        <button id="resetFilter" class="btn btn-outline-secondary w-100">
+            ↻
+        </button>
+    </div>
+
+</div>
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle">
                         <thead class="table-light">

@@ -26,17 +26,55 @@
         <hr class="border-secondary mb-4">
 
         <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item" data-target="overviewSection">
-                <a href="#" class="nav-link active">📊 Overview</a>
+            <li class="nav-item" data-target="overviewSection" data-title="Dashboard">
+                <a href="#" class="nav-link active">📊 Dashboard</a>
             </li>
-            <li class="nav-item" data-target="otaBreakdownSection">
-                <a href="#" class="nav-link">🌐 OTA Breakdown</a>
+
+            <li class="nav-group-label">FRONT DESK</li>
+            <li class="nav-item" data-target="reservationsSection" data-title="Reservations">
+                <a href="#" class="nav-link">📋 Reservations</a>
             </li>
-            <li class="nav-item" data-target="reservationsSection">
-                <a href="#" class="nav-link">📋 All Reservations</a>
+            <li class="nav-item" data-target="calendarSection" data-title="Calendar / Room Planner">
+                <a href="#" class="nav-link">🗓 Calendar / Room Planner</a>
             </li>
-            <li class="nav-item" data-target="roomAnalyticsSection">
-                <a href="#" class="nav-link">🛏 Room Analytics</a>
+            <li class="nav-item" data-target="checkInOutSection" data-title="Check-in & Check-out">
+                <a href="#" class="nav-link">🛎 Check-in & Check-out</a>
+            </li>
+            <li class="nav-item" data-target="guestDirectorySection" data-title="Guest Directory">
+                <a href="#" class="nav-link">👤 Guest Directory</a>
+            </li>
+
+            <li class="nav-group-label">HOTEL OPERATIONS</li>
+            <li class="nav-item" data-target="housekeepingSection" data-title="Housekeeping">
+                <a href="#" class="nav-link">🧹 Housekeeping</a>
+            </li>
+            <li class="nav-item" data-target="roomsInventorySection" data-title="Rooms & Inventory">
+                <a href="#" class="nav-link">🛏 Rooms & Inventory</a>
+            </li>
+
+            <li class="nav-group-label">REVENUE & DISTRIBUTION</li>
+            <li class="nav-item" data-target="ratesRevenueSection" data-title="Rates & Revenue">
+                <a href="#" class="nav-link">💹 Rates & Revenue</a>
+            </li>
+            <li class="nav-item" data-target="roomAnalyticsSection" data-title="Room Analytics">
+                <a href="#" class="nav-link">📈 Room Analytics</a>
+            </li>
+            <li class="nav-item" data-target="otaBreakdownSection" data-title="Channel Performance">
+                <a href="#" class="nav-link">🌐 Channel Performance</a>
+            </li>
+            <li class="nav-item" data-target="channelManagerSection" data-title="Channel Manager">
+                <a href="#" class="nav-link">🔄 Channel Manager</a>
+            </li>
+
+            <li class="nav-group-label">FINANCE & ADMIN</li>
+            <li class="nav-item" data-target="financeSection" data-title="Finance">
+                <a href="#" class="nav-link">💳 Finance</a>
+            </li>
+            <li class="nav-item" data-target="reportsSection" data-title="Reports">
+                <a href="#" class="nav-link">📑 Reports</a>
+            </li>
+            <li class="nav-item" data-target="settingsSection" data-title="Settings">
+                <a href="#" class="nav-link">⚙️ Settings</a>
             </li>
         </ul>
     </nav>
@@ -48,8 +86,8 @@
             <div class="d-flex align-items-center gap-3">
                 <button id="mobileToggleBtn" class="btn btn-outline-dark d-md-none">☰ Menu</button>
                 <div>
-                    <h2 class="h4 mb-0 fw-bold">Revenue Management & Analytics</h2>
-                    <small class="text-muted">Villa & Sanctuary by Astrid • Revenue System</small>
+                    <h2 id="pageTitle" class="h4 mb-0 fw-bold">Dashboard</h2>
+                    <small class="text-muted">Villa & Sanctuary by Astrid • Hotel Management</small>
                 </div>
             </div>
             <button id="btnRefresh" class="btn btn-primary shadow-sm">🔄 Sync Data OTA</button>
@@ -57,7 +95,7 @@
 
         
 <!-- Global Dashboard Filters -->
-<div class="card shadow-sm border-0 mb-4">
+<div id="dashboardFilters" class="card shadow-sm border-0 mb-4">
     <div class="card-body">
         <h6 class="fw-bold mb-3">Dashboard Filters</h6>
 
@@ -128,7 +166,7 @@
 
 
         <!-- Top Metrics Cards -->
-        <div class="row g-3 mb-4">
+        <div id="dashboardMetrics" class="row g-3 mb-4">
             <div class="col-md-3">
                 <div class="card card-body border-0 shadow-sm">
                     <small class="text-muted font-weight-bold">Total Revenue</small>
@@ -267,6 +305,7 @@
                                 <th>Rate / Night</th>
                                 <th>Total Amount</th>
                                 <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="allReservationsBody"></tbody>
@@ -293,6 +332,76 @@
                         <tbody id="roomTypeAnalyticsBody"></tbody>
                     </table>
                 </div>
+            </div>
+        </section>
+
+        <section id="calendarSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Calendar / Room Planner</h5>
+                <p class="text-muted mb-0">Kalender ketersediaan kamar dan jadwal reservasi akan tersedia di sini.</p>
+            </div>
+        </section>
+
+        <section id="checkInOutSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Check-in & Check-out</h5>
+                <p class="text-muted mb-0">Daftar kedatangan, keberangkatan, dan proses check-in/check-out akan tersedia di sini.</p>
+            </div>
+        </section>
+
+        <section id="guestDirectorySection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Guest Directory</h5>
+                <p class="text-muted mb-0">Profil dan riwayat tamu akan tersedia di sini.</p>
+            </div>
+        </section>
+
+        <section id="housekeepingSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Housekeeping</h5>
+                <p class="text-muted mb-0">Status kebersihan kamar dan tugas housekeeping akan tersedia di sini.</p>
+            </div>
+        </section>
+
+        <section id="roomsInventorySection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Rooms & Inventory</h5>
+                <p class="text-muted mb-0">Pengaturan kamar, tipe kamar, kapasitas, dan inventaris akan tersedia di sini.</p>
+            </div>
+        </section>
+
+        <section id="ratesRevenueSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Rates & Revenue</h5>
+                <p class="text-muted mb-0">Kalender harga, aturan tarif, dan forecast revenue akan tersedia di sini.</p>
+            </div>
+        </section>
+
+        <section id="channelManagerSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Channel Manager</h5>
+                <p class="text-muted mb-0">Koneksi OTA, pemetaan kamar, serta sinkronisasi harga dan ketersediaan akan tersedia di sini.</p>
+            </div>
+        </section>
+
+        <section id="financeSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Finance</h5>
+                <p class="text-muted mb-0">Folio, tagihan, pembayaran, deposit, dan transaksi akan tersedia di sini.</p>
+            </div>
+        </section>
+
+        <section id="reportsSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Reports</h5>
+                <p class="text-muted mb-0">Laporan operasional, okupansi, revenue, pembatalan, dan performa channel akan tersedia di sini.</p>
+            </div>
+        </section>
+
+        <section id="settingsSection" class="content-section d-none">
+            <div class="card border-0 shadow-sm p-4">
+                <h5>Settings</h5>
+                <p class="text-muted mb-0">Profil hotel, pajak, kebijakan, pengguna, role, dan integrasi akan tersedia di sini.</p>
             </div>
         </section>
     </div>
@@ -327,7 +436,15 @@
                 </select>
 
                 <label for="roomType">Room Type</label>
-                <input type="text" id="roomType" required>
+                <select id="roomType" required>
+                    <option value="">Select Room Type</option>
+                    <option>Standard Twin</option>
+                    <option>Standard Double</option>
+                    <option>Superior Double</option>
+                    <option>Deluxe Double</option>
+                    <option>Executive Double</option>
+                    <option>Junior Suite Double</option>
+                </select>
 
                 <label for="bookingRooms">Number of Rooms</label>
                 <input type="number" id="bookingRooms" min="1" value="1" required>
@@ -363,6 +480,23 @@
                 <button type="submit" class="btn-save-reservation">
                     Save Reservation
                 </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- RESERVATION DETAILS MODAL -->
+<div id="reservationDetailsModal" class="reservation-modal" role="dialog" aria-modal="true" aria-labelledby="reservationDetailsTitle">
+    <div class="reservation-modal-content">
+        <div class="reservation-modal-header">
+            <h4 id="reservationDetailsTitle">Reservation Details</h4>
+            <button type="button" id="btnCloseReservationDetails" class="btn-close-modal" aria-label="Close">&times;</button>
+        </div>
+        <form id="reservationDetailsForm">
+            <div id="reservationDetailsBody" class="reservation-form-body"></div>
+            <div class="reservation-modal-footer">
+                <button type="button" id="btnCloseReservationDetailsFooter">Close</button>
+                <button type="submit" class="btn-save-reservation">Save Changes</button>
             </div>
         </form>
     </div>

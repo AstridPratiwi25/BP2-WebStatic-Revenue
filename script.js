@@ -13,7 +13,7 @@ const defaultBookingData = [
         guest: "Budi Santoso",
         channel: "Traveloka",
         otaClass: "ota-traveloka",
-        room: "Deluxe Ocean View",
+        room: "Deluxe Double",
         nights: 3,
         price: 4500000,
         status: "confirmed",
@@ -25,7 +25,7 @@ const defaultBookingData = [
         guest: "Siti Rahma",
         channel: "Tiket.com",
         otaClass: "ota-tiket",
-        room: "Grand Deluxe King",
+        room: "Deluxe Double",
         nights: 2,
         price: 3200000,
         status: "confirmed",
@@ -37,7 +37,7 @@ const defaultBookingData = [
         guest: "Michael Scott",
         channel: "Agoda",
         otaClass: "ota-agoda",
-        room: "Superior Room",
+        room: "Superior Double",
         nights: 1,
         price: 1200000,
         status: "confirmed",
@@ -49,7 +49,7 @@ const defaultBookingData = [
         guest: "Jessica Tan",
         channel: "Booking.com",
         otaClass: "ota-booking",
-        room: "Executive Suite",
+        room: "Executive Double",
         nights: 2,
         price: 5000000,
         status: "confirmed",
@@ -61,7 +61,7 @@ const defaultBookingData = [
         guest: "Ahmad Dahlan",
         channel: "Expedia",
         otaClass: "ota-expedia",
-        room: "Deluxe Ocean View",
+        room: "Deluxe Double",
         nights: 2,
         price: 3000000,
         status: "cancelled",
@@ -73,7 +73,7 @@ const defaultBookingData = [
         guest: "David Kim",
         channel: "Trip.com",
         otaClass: "ota-trip",
-        room: "Superior Room",
+        room: "Superior Double",
         nights: 4,
         price: 4800000,
         status: "confirmed",
@@ -85,7 +85,7 @@ const defaultBookingData = [
         guest: "Rina Wijaya",
         channel: "Direct Website",
         otaClass: "ota-website",
-        room: "Presidential Suite",
+        room: "Junior Suite Double",
         nights: 2,
         price: 8500000,
         status: "confirmed",
@@ -97,7 +97,7 @@ const defaultBookingData = [
         guest: "Eko Prasetyo",
         channel: "Traveloka",
         otaClass: "ota-traveloka",
-        room: "Superior Room",
+        room: "Superior Double",
         nights: 1,
         price: 1200000,
         status: "pending",
@@ -108,19 +108,100 @@ const defaultBookingData = [
 
 
 const STORAGE_KEY = "revenueTrackerBookings";
+const ROOM_TYPES = [
+    "Standard Twin",
+    "Standard Double",
+    "Superior Double",
+    "Deluxe Double",
+    "Executive Double",
+    "Junior Suite Double"
+];
+
+function normalizeRoomType(roomType) {
+    if (ROOM_TYPES.includes(roomType)) {
+        return roomType;
+    }
+
+    const normalized = String(roomType || "").toLowerCase();
+    if (normalized.includes("junior") || normalized.includes("presidential")) {
+        return "Junior Suite Double";
+    }
+    if (normalized.includes("executive")) {
+        return "Executive Double";
+    }
+    if (normalized.includes("deluxe")) {
+        return "Deluxe Double";
+    }
+    if (normalized.includes("superior")) {
+        return "Superior Double";
+    }
+    if (normalized.includes("twin")) {
+        return "Standard Twin";
+    }
+
+    return "Standard Double";
+}
+
+function getDepartureDate(checkInDate, nights) {
+    const stayNights = Number(nights);
+    if (!checkInDate || !Number.isInteger(stayNights) || stayNights < 1) {
+        return "";
+    }
+
+    const arrival = new Date(`${checkInDate}T00:00:00Z`);
+    if (Number.isNaN(arrival.getTime())) {
+        return "";
+    }
+
+    arrival.setUTCDate(arrival.getUTCDate() + stayNights);
+    return arrival.toISOString().slice(0, 10);
+}
 
 function loadBookingData() {
     const savedData = localStorage.getItem(STORAGE_KEY);
 
     if (savedData) {
+        let bookings;
         try {
-            return JSON.parse(savedData);
+            bookings = JSON.parse(savedData);
         } catch (error) {
             console.error("Failed to load saved bookings:", error);
         }
+
+        if (Array.isArray(bookings)) {
+            let bookingsUpdated = false;
+            const normalizedBookings = bookings.map(booking => {
+                const departureDate = getDepartureDate(booking.checkInDate, booking.nights);
+                const room = normalizeRoomType(booking.room);
+                const nextDepartureDate = departureDate || booking.departureDate;
+                if (room === booking.room && nextDepartureDate === booking.departureDate) {
+                    return booking;
+                }
+
+                bookingsUpdated = true;
+                return { ...booking, room, departureDate: nextDepartureDate };
+            });
+
+            if (bookingsUpdated) {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedBookings));
+                } catch (error) {
+                    console.error("Failed to save updated reservation dates and room types:", error);
+                }
+            }
+
+            return normalizedBookings;
+        }
     }
 
-    return [...defaultBookingData];
+    return defaultBookingData.map(booking => {
+        const departureDate = getDepartureDate(booking.checkInDate, booking.nights);
+        return {
+            ...booking,
+            room: normalizeRoomType(booking.room),
+            ...(departureDate ? { departureDate } : {})
+        };
+    });
 }
 
 let bookingData = loadBookingData();
@@ -512,7 +593,7 @@ function renderReservations() {
     if (filteredData.length === 0) {
         resBody.innerHTML = `
             <tr>
-                <td colspan="11" class="text-center text-muted py-4">
+                <td colspan="12" class="text-center text-muted py-4">
                     No reservations found.
                 </td>
             </tr>
@@ -541,6 +622,12 @@ function renderReservations() {
                     <span class="badge ${item.status}">
                         ${item.status.toUpperCase()}
                     </span>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-view-reservation"
+                        data-reservation-id="${escapeHtml(item.id)}">
+                        View
+                    </button>
                 </td>
             </tr>
         `;
@@ -679,6 +766,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     setupReservationForm();
+    setupReservationDetails();
 
     // Mobile sidebar
     const closeSidebar = setupMobileSidebar();
@@ -714,6 +802,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (targetSection) {
                 targetSection.classList.remove("d-none");
+            }
+
+            const pageTitle = getElement("pageTitle");
+            if (pageTitle) {
+                pageTitle.textContent = item.getAttribute("data-title") || currentLink?.textContent.trim() || "Hotel Management";
+            }
+
+            const showDashboardControls = [
+                "overviewSection",
+                "otaBreakdownSection",
+                "reservationsSection",
+                "roomAnalyticsSection"
+            ].includes(targetId);
+            const dashboardFilters = getElement("dashboardFilters");
+            const dashboardMetrics = getElement("dashboardMetrics");
+
+            if (dashboardFilters) {
+                dashboardFilters.classList.toggle("d-none", !showDashboardControls);
+            }
+            if (dashboardMetrics) {
+                dashboardMetrics.classList.toggle("d-none", !showDashboardControls);
             }
 
             if (closeSidebar) {
@@ -853,6 +962,211 @@ function setupReservationForm() {
         nightsInput.value = "";
         departureDate.min = "";
         getElement("reservationModal").classList.remove("active");
+    });
+}
+
+function setupReservationDetails() {
+    const resBody = getElement("allReservationsBody");
+    const modal = getElement("reservationDetailsModal");
+    const detailsBody = getElement("reservationDetailsBody");
+    const form = getElement("reservationDetailsForm");
+    const closeButton = getElement("btnCloseReservationDetails");
+    const closeFooterButton = getElement("btnCloseReservationDetailsFooter");
+
+    if (!resBody || !modal || !detailsBody || !form || !closeButton || !closeFooterButton) {
+        return;
+    }
+
+    let activeReservationId = null;
+
+    function closeModal() {
+        modal.classList.remove("active");
+        activeReservationId = null;
+    }
+
+    function showReservation(reservation) {
+        const nights = Number(reservation.nights) || 0;
+        const rooms = Number(reservation.rooms) || 1;
+        const rate = reservation.rate ?? (nights > 0 ? reservation.price / (nights * rooms) : 0);
+        const channels = [
+            "Traveloka",
+            "Tiket.com",
+            "Agoda",
+            "Booking.com",
+            "Expedia",
+            "Trip.com",
+            "Direct Website"
+        ];
+        const channelOptions = channels.includes(reservation.channel)
+            ? channels
+            : [...channels, reservation.channel];
+        activeReservationId = reservation.id;
+        detailsBody.innerHTML = `
+            <div class="reservation-detail-row"><strong>Booking ID</strong><span>${escapeHtml(reservation.id)}</span></div>
+            <label for="editGuestName">Guest Name</label>
+            <input id="editGuestName" type="text" value="${escapeHtml(reservation.guest)}" required>
+            <label for="editBookingChannel">OTA Channel</label>
+            <select id="editBookingChannel" required>
+                ${channelOptions.map(channel => `<option value="${escapeHtml(channel)}"${channel === reservation.channel ? " selected" : ""}>${escapeHtml(channel)}</option>`).join("")}
+            </select>
+            <label for="editRoomType">Room Type</label>
+            <select id="editRoomType" required>
+                ${ROOM_TYPES.map(roomType => `<option value="${escapeHtml(roomType)}"${roomType === reservation.room ? " selected" : ""}>${escapeHtml(roomType)}</option>`).join("")}
+            </select>
+            <label for="editBookingRooms">Number of Rooms</label>
+            <input id="editBookingRooms" type="number" min="1" value="${rooms}" required>
+            <label for="editArrivalDate">Arrival Date</label>
+            <input id="editArrivalDate" type="date" value="${escapeHtml(reservation.checkInDate || "")}" required>
+            <label for="editDepartureDate">Departure Date</label>
+            <input id="editDepartureDate" type="date" value="${escapeHtml(reservation.departureDate || "")}" required>
+            <label for="editBookingNights">Duration (Nights)</label>
+            <input id="editBookingNights" type="number" min="1" value="${nights || ""}" readonly required>
+            <label for="editBookingRate">Rate per Night (IDR)</label>
+            <input id="editBookingRate" type="number" min="0" value="${rate}" required>
+            <label for="editBookingTotalAmount">Total Amount (IDR)</label>
+            <input id="editBookingTotalAmount" type="number" min="0" value="${Number(reservation.price) || 0}" readonly required>
+            <label for="editBookingStatus">Booking Status</label>
+            <select id="editBookingStatus" required>
+                <option value="confirmed"${reservation.status === "confirmed" ? " selected" : ""}>CONFIRMED</option>
+                <option value="pending"${reservation.status === "pending" ? " selected" : ""}>PENDING</option>
+                <option value="cancelled"${reservation.status === "cancelled" ? " selected" : ""}>CANCELLED</option>
+            </select>
+            <div class="reservation-detail-row"><strong>Booking Date</strong><span>${escapeHtml(reservation.bookingDate || "-")}</span></div>
+        `;
+
+        const arrivalDate = getElement("editArrivalDate");
+        const departureDate = getElement("editDepartureDate");
+        const nightsInput = getElement("editBookingNights");
+        const roomsInput = getElement("editBookingRooms");
+        const rateInput = getElement("editBookingRate");
+        const totalAmountInput = getElement("editBookingTotalAmount");
+
+        function updateTotalAmount() {
+            const stayNights = Number(nightsInput.value);
+            const roomCount = Number(roomsInput.value);
+            const nightlyRate = Number(rateInput.value);
+            totalAmountInput.value = stayNights > 0 && roomCount > 0 && nightlyRate >= 0
+                ? String(stayNights * roomCount * nightlyRate)
+                : "";
+        }
+
+        function updateDuration() {
+            departureDate.min = arrivalDate.value;
+            departureDate.setCustomValidity("");
+
+            if (!arrivalDate.value || !departureDate.value) {
+                nightsInput.value = "";
+                updateTotalAmount();
+                return;
+            }
+
+            const arrivalUtc = Date.parse(`${arrivalDate.value}T00:00:00Z`);
+            const departureUtc = Date.parse(`${departureDate.value}T00:00:00Z`);
+            const stayNights = (departureUtc - arrivalUtc) / 86400000;
+
+            if (stayNights < 1) {
+                nightsInput.value = "";
+                departureDate.setCustomValidity("Departure date must be after arrival date.");
+            } else {
+                nightsInput.value = stayNights;
+            }
+
+            updateTotalAmount();
+        }
+
+        arrivalDate.addEventListener("change", updateDuration);
+        departureDate.addEventListener("change", updateDuration);
+        roomsInput.addEventListener("input", updateTotalAmount);
+        rateInput.addEventListener("input", updateTotalAmount);
+        modal.classList.add("active");
+        closeButton.focus();
+    }
+
+    resBody.addEventListener("click", event => {
+        const button = event.target.closest(".btn-view-reservation");
+        if (!button || !resBody.contains(button)) return;
+
+        const reservation = bookingData.find(item => item.id === button.dataset.reservationId);
+        if (reservation) {
+            showReservation(reservation);
+        }
+    });
+
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+        const reservation = bookingData.find(item => item.id === activeReservationId);
+        if (!reservation) return;
+
+        const arrivalDate = getElement("editArrivalDate");
+        const departureDate = getElement("editDepartureDate");
+        const nightsInput = getElement("editBookingNights");
+        const roomsInput = getElement("editBookingRooms");
+        const rateInput = getElement("editBookingRate");
+        const totalAmountInput = getElement("editBookingTotalAmount");
+        departureDate.min = arrivalDate.value;
+
+        if (arrivalDate.value && departureDate.value) {
+            const arrivalUtc = Date.parse(`${arrivalDate.value}T00:00:00Z`);
+            const departureUtc = Date.parse(`${departureDate.value}T00:00:00Z`);
+            const stayNights = (departureUtc - arrivalUtc) / 86400000;
+            departureDate.setCustomValidity(stayNights < 1
+                ? "Departure date must be after arrival date."
+                : "");
+            if (stayNights > 0) nightsInput.value = stayNights;
+            totalAmountInput.value = stayNights > 0
+                ? String(stayNights * Number(roomsInput.value) * Number(rateInput.value))
+                : "";
+        }
+
+        if (!form.reportValidity()) return;
+
+        const channel = getElement("editBookingChannel").value;
+        const channelClasses = {
+            "Traveloka": "ota-traveloka",
+            "Tiket.com": "ota-tiket",
+            "Agoda": "ota-agoda",
+            "Booking.com": "ota-booking",
+            "Expedia": "ota-expedia",
+            "Trip.com": "ota-trip",
+            "Direct Website": "ota-website"
+        };
+        const previousReservation = { ...reservation };
+        Object.assign(reservation, {
+            guest: getElement("editGuestName").value.trim(),
+            channel,
+            otaClass: channelClasses[channel] || reservation.otaClass,
+            room: getElement("editRoomType").value.trim(),
+            rooms: Number(roomsInput.value),
+            checkInDate: arrivalDate.value,
+            departureDate: departureDate.value,
+            nights: Number(nightsInput.value),
+            rate: Number(rateInput.value),
+            price: Number(totalAmountInput.value),
+            status: getElement("editBookingStatus").value
+        });
+
+        try {
+            saveBookingData();
+        } catch (error) {
+            Object.assign(reservation, previousReservation);
+            console.error("Failed to update reservation:", error);
+            alert("Reservation changes could not be saved. Please check browser storage settings and try again.");
+            return;
+        }
+
+        renderAllPages();
+        showReservation(reservation);
+    });
+
+    closeButton.addEventListener("click", closeModal);
+    closeFooterButton.addEventListener("click", closeModal);
+    modal.addEventListener("click", event => {
+        if (event.target === modal) closeModal();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && modal.classList.contains("active")) {
+            closeModal();
+        }
     });
 }
 

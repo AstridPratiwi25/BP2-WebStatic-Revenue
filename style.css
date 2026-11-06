@@ -14,6 +14,7 @@ body {
     top: 0;
     left: 0;
     height: 100vh;
+    overflow-y: auto;
     z-index: 1000;
     transition: all 0.3s ease;
 }
@@ -64,6 +65,16 @@ body {
 .nav-link:hover, .nav-link.active {
     color: #fff !important;
     background-color: rgba(255, 255, 255, 0.15);
+}
+
+.nav-group-label {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    list-style: none;
+    margin: 18px 0 6px;
+    padding: 0 12px;
 }
 
 /* Responsive Mobile Sidebar */
@@ -141,6 +152,23 @@ body {
     padding: 20px;
     display: grid;
     gap: 10px;
+}
+
+.reservation-detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.reservation-detail-row strong {
+    color: #555;
+}
+
+.reservation-detail-row span {
+    text-align: right;
+    overflow-wrap: anywhere;
 }
 
 .reservation-form-body input,

@@ -146,6 +146,16 @@ function getElement(id) {
     return document.getElementById(id);
 }
 
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
+}
+
 
 // 3. GLOBAL DASHBOARD FILTER
 
@@ -193,6 +203,7 @@ function renderAllPages() {
 
     // Calculate booking statistics
     filteredBookings.forEach(item => {
+        const roomCount = Number(item.rooms) || 1;
 
         if (item.status === "cancelled") {
             cancelledCount++;
@@ -207,33 +218,37 @@ function renderAllPages() {
         if (item.status !== "confirmed") return;
 
         totalRevenue += item.price;
-        totalNights += item.nights;
+        totalNights += item.nights * roomCount;
         confirmedCount++;
 
         // Channel statistics
         if (!channelStats[item.channel]) {
             channelStats[item.channel] = {
                 count: 0,
+                rooms: 0,
                 nights: 0,
                 revenue: 0
             };
         }
 
         channelStats[item.channel].count++;
-        channelStats[item.channel].nights += item.nights;
+        channelStats[item.channel].rooms += roomCount;
+        channelStats[item.channel].nights += item.nights * roomCount;
         channelStats[item.channel].revenue += item.price;
 
         // Room statistics
         if (!roomStats[item.room]) {
             roomStats[item.room] = {
                 count: 0,
+                bookings: 0,
                 nights: 0,
                 revenue: 0
             };
         }
 
-        roomStats[item.room].count++;
-        roomStats[item.room].nights += item.nights;
+        roomStats[item.room].count += roomCount;
+        roomStats[item.room].bookings++;
+        roomStats[item.room].nights += item.nights * roomCount;
         roomStats[item.room].revenue += item.price;
     });
 
@@ -258,7 +273,7 @@ function renderAllPages() {
         if (filteredBookings.length === 0) {
             overviewBody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
+                    <td colspan="7" class="text-center text-muted py-4">
                         No reservations found.
                     </td>
                 </tr>
@@ -270,10 +285,11 @@ function renderAllPages() {
                         <td><strong>${item.id}</strong></td>
                         <td>
                             <span class="channel-badge ${item.otaClass}">
-                                ${item.channel}
+                                ${escapeHtml(item.channel)}
                             </span>
                         </td>
-                        <td>${item.room}</td>
+                        <td>${escapeHtml(item.room)}</td>
+                        <td>${Number(item.rooms) || 1}</td>
                         <td>${item.nights} Nights</td>
                         <td>${formatRupiah(item.price)}</td>
                         <td>
@@ -355,7 +371,7 @@ function renderAllPages() {
                 otaBody.innerHTML += `
                     <tr>
                         <td><strong>${channel}</strong></td>
-                        <td>${data.count} Bookings</td>
+                        <td>${data.count} Bookings (${data.rooms} Rooms)</td>
                         <td>${data.nights} Nights</td>
                         <td>${formatRupiah(data.revenue)}</td>
                         <td>${formatRupiah(commission)}</td>
@@ -394,7 +410,7 @@ function renderAllPages() {
                 roomBody.innerHTML += `
                     <tr>
                         <td><strong>${room}</strong></td>
-                        <td>${data.count} Bookings (${data.nights} Nights)</td>
+                        <td>${data.count} Rooms (${data.bookings} Bookings, ${data.nights} Room Nights)</td>
                         <td>${formatRupiah(data.revenue)}</td>
                         <td>${formatRupiah(roomADR)}</td>
                     </tr>
@@ -496,7 +512,7 @@ function renderReservations() {
     if (filteredData.length === 0) {
         resBody.innerHTML = `
             <tr>
-                <td colspan="7" class="text-center text-muted py-4">
+                <td colspan="11" class="text-center text-muted py-4">
                     No reservations found.
                 </td>
             </tr>
@@ -508,14 +524,18 @@ function renderReservations() {
         resBody.innerHTML += `
             <tr>
                 <td><strong>${item.id}</strong></td>
-                <td>${item.guest}</td>
+                <td>${escapeHtml(item.guest)}</td>
                 <td>
                     <span class="channel-badge ${item.otaClass}">
-                        ${item.channel}
+                        ${escapeHtml(item.channel)}
                     </span>
                 </td>
-                <td>${item.room}</td>
+                <td>${escapeHtml(item.room)}</td>
+                <td>${Number(item.rooms) || 1}</td>
+                <td>${item.checkInDate || "-"}</td>
+                <td>${item.departureDate || "-"}</td>
                 <td>${item.nights} Nights</td>
+                <td>${formatRupiah(item.rate ?? (item.price / item.nights))}</td>
                 <td>${formatRupiah(item.price)}</td>
                 <td>
                     <span class="badge ${item.status}">
@@ -658,6 +678,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resetFilter.addEventListener("click", resetReservationFilters);
     }
 
+    setupReservationForm();
 
     // Mobile sidebar
     const closeSidebar = setupMobileSidebar();
@@ -718,6 +739,122 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+function setupReservationForm() {
+    const form = getElement("reservationForm");
+    const arrivalDate = getElement("arrivalDate");
+    const departureDate = getElement("departureDate");
+    const nightsInput = getElement("bookingNights");
+    const rateInput = getElement("bookingRate");
+    const roomsInput = getElement("bookingRooms");
+    const totalAmountInput = getElement("bookingTotalAmount");
+
+    if (!form || !arrivalDate || !departureDate || !nightsInput || !rateInput || !roomsInput || !totalAmountInput) {
+        return;
+    }
+
+    function updateTotalAmount() {
+        const nights = Number(nightsInput.value);
+        const rate = Number(rateInput.value);
+        const rooms = Number(roomsInput.value);
+
+        totalAmountInput.value = nights > 0 && rate >= 0 && rooms > 0
+            ? String(rate * nights * rooms)
+            : "";
+    }
+
+    function updateDuration() {
+        const arrival = arrivalDate.value;
+        const departure = departureDate.value;
+        departureDate.min = arrival;
+
+        if (!arrival || !departure) {
+            nightsInput.value = "";
+            departureDate.setCustomValidity("");
+            updateTotalAmount();
+            return;
+        }
+
+        const arrivalUtc = Date.parse(`${arrival}T00:00:00Z`);
+        const departureUtc = Date.parse(`${departure}T00:00:00Z`);
+        const nights = (departureUtc - arrivalUtc) / 86400000;
+
+        if (nights < 1) {
+            nightsInput.value = "";
+            departureDate.setCustomValidity("Departure date must be after arrival date.");
+            updateTotalAmount();
+            return;
+        }
+
+        departureDate.setCustomValidity("");
+        nightsInput.value = nights;
+        updateTotalAmount();
+    }
+
+    arrivalDate.addEventListener("change", updateDuration);
+    departureDate.addEventListener("change", updateDuration);
+    rateInput.addEventListener("input", updateTotalAmount);
+    roomsInput.addEventListener("input", updateTotalAmount);
+
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+        updateDuration();
+        updateTotalAmount();
+
+        if (!form.reportValidity()) return;
+
+        const channel = getElement("bookingChannel").value;
+        const channelClasses = {
+            "Traveloka": "ota-traveloka",
+            "Tiket.com": "ota-tiket",
+            "Agoda": "ota-agoda",
+            "Booking.com": "ota-booking",
+            "Expedia": "ota-expedia",
+            "Trip.com": "ota-trip",
+            "Direct Website": "ota-website"
+        };
+        const nextId = bookingData.reduce((highestId, booking) => {
+            const match = booking.id.match(/^BK-(\d+)$/);
+            return match ? Math.max(highestId, Number(match[1])) : highestId;
+        }, 0) + 1;
+        const today = new Date();
+        const bookingDate = [
+            today.getFullYear(),
+            String(today.getMonth() + 1).padStart(2, "0"),
+            String(today.getDate()).padStart(2, "0")
+        ].join("-");
+        const reservation = {
+            id: `BK-${nextId}`,
+            guest: getElement("guestName").value.trim(),
+            channel,
+            otaClass: channelClasses[channel],
+            room: getElement("roomType").value.trim(),
+            rooms: Number(roomsInput.value),
+            nights: Number(nightsInput.value),
+            rate: Number(rateInput.value),
+            price: Number(totalAmountInput.value),
+            status: getElement("bookingStatus").value.toLowerCase(),
+            bookingDate,
+            checkInDate: arrivalDate.value,
+            departureDate: departureDate.value
+        };
+
+        bookingData.push(reservation);
+        try {
+            saveBookingData();
+        } catch (error) {
+            bookingData.pop();
+            console.error("Failed to save reservation:", error);
+            alert("Reservation could not be saved. Please check browser storage settings and try again.");
+            return;
+        }
+
+        renderAllPages();
+        form.reset();
+        nightsInput.value = "";
+        departureDate.min = "";
+        getElement("reservationModal").classList.remove("active");
+    });
+}
 
 const reservationModal = document.getElementById("reservationModal");
 const btnAddReservation = document.getElementById("btnAddReservation");

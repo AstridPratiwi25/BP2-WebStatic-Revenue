@@ -55,6 +55,78 @@
             <button id="btnRefresh" class="btn btn-primary shadow-sm">🔄 Sync Data OTA</button>
         </header>
 
+        
+<!-- Global Dashboard Filters -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <h6 class="fw-bold mb-3">Dashboard Filters</h6>
+
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label for="globalChannelFilter" class="form-label">
+                    OTA Channel
+                </label>
+                <select id="globalChannelFilter" class="form-select">
+                    <option value="all">All Channels</option>
+                    <option value="Traveloka">Traveloka</option>
+                    <option value="Tiket.com">Tiket.com</option>
+                    <option value="Agoda">Agoda</option>
+                    <option value="Booking.com">Booking.com</option>
+                    <option value="Expedia">Expedia</option>
+                    <option value="Trip.com">Trip.com</option>
+                    <option value="Direct Website">Direct Website</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="dateDimensionFilter" class="form-label">
+                    Date Dimension
+                </label>
+                <select id="dateDimensionFilter" class="form-select">
+                    <option value="bookingDate">Booking Date</option>
+                    <option value="checkInDate">Check-in Date</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label for="startDateFilter" class="form-label">
+                    Start Date
+                </label>
+                <input type="date" id="startDateFilter" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label for="endDateFilter" class="form-label">
+                    End Date
+                </label>
+                <input type="date" id="endDateFilter" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label for="granularityFilter" class="form-label">
+                    Period
+                </label>
+                <select id="granularityFilter" class="form-select">
+                    <option value="all">All Periods</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button id="applyGlobalFilter" class="btn btn-dark">
+                Apply Filters
+            </button>
+            <button id="resetGlobalFilter" class="btn btn-outline-secondary">
+                Reset
+            </button>
+        </div>
+    </div>
+</div>
+
+
         <!-- Top Metrics Cards -->
         <div class="row g-3 mb-4">
             <div class="col-md-3">
@@ -86,7 +158,14 @@
         <!-- 1. OVERVIEW SECTION -->
         <section id="overviewSection" class="content-section">
             <div class="card border-0 shadow-sm p-3">
-                <h5 class="card-title mb-3">Overview Recent Bookings</h5>
+                
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="card-title mb-0">Recent Bookings</h5>
+    <button class="btn btn-primary" id="btnAddReservation">
+        + Add Reservation
+    </button>
+</div>
+
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">

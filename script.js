@@ -718,4 +718,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+const reservationModal = document.getElementById("reservationModal");
+const btnAddReservation = document.getElementById("btnAddReservation");
+const btnCloseReservation = document.getElementById("btnCloseReservation");
+const btnCancelReservation = document.getElementById("btnCancelReservation");
+
+function openReservationModal() {
+    reservationModal.classList.add("active");
+}
+
+function closeReservationModal() {
+    reservationModal.classList.remove("active");
+}
+
+
+if (reservationModal && btnAddReservation && btnCloseReservation && btnCancelReservation) {
+    btnAddReservation.addEventListener("click", openReservationModal);
+    btnCloseReservation.addEventListener("click", closeReservationModal);
+    btnCancelReservation.addEventListener("click", closeReservationModal);
+}
+
+
 

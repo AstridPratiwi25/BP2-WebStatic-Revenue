@@ -337,71 +337,71 @@
 
         <section id="calendarSection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
-                <h5>Calendar / Room Planner</h5>
-                <p class="text-muted mb-0">Kalender ketersediaan kamar dan jadwal reservasi akan tersedia di sini.</p>
+                <div class="d-flex justify-content-between align-items-center mb-3"><div><h5 class="mb-1">Calendar / Room Planner</h5><p class="text-muted mb-0">Jadwal kamar dari reservasi tersimpan.</p></div><input id="plannerDate" type="month" class="form-control" style="max-width:200px"></div>
+                <div class="table-responsive"><table class="table table-bordered align-middle"><thead id="plannerHead" class="table-light"></thead><tbody id="plannerBody"></tbody></table></div>
             </div>
         </section>
 
         <section id="checkInOutSection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
                 <h5>Check-in & Check-out</h5>
-                <p class="text-muted mb-0">Daftar kedatangan, keberangkatan, dan proses check-in/check-out akan tersedia di sini.</p>
+                <div class="row g-3"><div class="col-lg-6"><h6>Kedatangan hari ini</h6><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Tamu</th><th>Kamar</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="arrivalsBody"></tbody></table></div></div><div class="col-lg-6"><h6>Keberangkatan hari ini</h6><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Tamu</th><th>Kamar</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="departuresBody"></tbody></table></div></div></div>
             </div>
         </section>
 
         <section id="guestDirectorySection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
                 <h5>Guest Directory</h5>
-                <p class="text-muted mb-0">Profil dan riwayat tamu akan tersedia di sini.</p>
+                <input id="guestSearch" class="form-control mb-3" placeholder="Cari nama tamu atau channel"><div class="table-responsive"><table class="table table-hover align-middle"><thead class="table-light"><tr><th>Nama</th><th>Booking</th><th>Channel terakhir</th><th>Kunjungan</th><th>Total belanja</th></tr></thead><tbody id="guestDirectoryBody"></tbody></table></div>
             </div>
         </section>
 
         <section id="housekeepingSection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
                 <h5>Housekeeping</h5>
-                <p class="text-muted mb-0">Status kebersihan kamar dan tugas housekeeping akan tersedia di sini.</p>
+                <p class="text-muted">Status kamar dapat diubah dan tersimpan di browser ini.</p><div class="table-responsive"><table class="table table-hover align-middle"><thead class="table-light"><tr><th>Kamar</th><th>Tipe</th><th>Status kebersihan</th><th>Catatan</th><th></th></tr></thead><tbody id="housekeepingBody"></tbody></table></div>
             </div>
         </section>
 
         <section id="roomsInventorySection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
                 <h5>Rooms & Inventory</h5>
-                <p class="text-muted mb-0">Pengaturan kamar, tipe kamar, kapasitas, dan inventaris akan tersedia di sini.</p>
+                <div class="d-flex justify-content-between align-items-center mb-3"><p class="text-muted mb-0">Inventaris demo untuk pengelolaan kamar.</p><button id="addInventoryRoom" class="btn btn-primary">+ Tambah Kamar</button></div><div class="table-responsive"><table class="table table-hover align-middle"><thead class="table-light"><tr><th>No. Kamar</th><th>Tipe</th><th>Kapasitas</th><th>Status</th><th></th></tr></thead><tbody id="inventoryBody"></tbody></table></div>
             </div>
         </section>
 
         <section id="ratesRevenueSection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
                 <h5>Rates & Revenue</h5>
-                <p class="text-muted mb-0">Kalender harga, aturan tarif, dan forecast revenue akan tersedia di sini.</p>
+                <p class="text-muted">Atur tarif dasar per tipe kamar. Tarif tersimpan di browser ini.</p><div class="table-responsive"><table class="table align-middle"><thead class="table-light"><tr><th>Tipe Kamar</th><th>Tarif / malam</th><th>Booked nights</th><th>Estimasi revenue</th></tr></thead><tbody id="ratesBody"></tbody></table></div>
             </div>
         </section>
 
         <section id="channelManagerSection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
                 <h5>Channel Manager</h5>
-                <p class="text-muted mb-0">Koneksi OTA, pemetaan kamar, serta sinkronisasi harga dan ketersediaan akan tersedia di sini.</p>
+                <p class="text-muted">Status koneksi contoh; sinkronisasi OTA langsung memerlukan kredensial dan API provider.</p><div class="table-responsive"><table class="table align-middle"><thead class="table-light"><tr><th>Channel</th><th>Status koneksi</th><th>Reservasi</th><th>Sinkron terakhir</th></tr></thead><tbody id="channelManagerBody"></tbody></table></div><button id="syncChannels" class="btn btn-outline-primary">Simulasikan Sinkronisasi</button><span id="syncMessage" class="small text-muted ms-2"></span>
             </div>
         </section>
 
         <section id="financeSection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
                 <h5>Finance</h5>
-                <p class="text-muted mb-0">Folio, tagihan, pembayaran, deposit, dan transaksi akan tersedia di sini.</p>
+                <div class="row g-3 mb-3"><div class="col-md-4"><div class="card card-body"><small class="text-muted">Revenue terkonfirmasi</small><strong id="financeRevenue"></strong></div></div><div class="col-md-4"><div class="card card-body"><small class="text-muted">Estimasi komisi OTA (15%)</small><strong id="financeCommission"></strong></div></div><div class="col-md-4"><div class="card card-body"><small class="text-muted">Net setelah komisi</small><strong id="financeNet"></strong></div></div></div><div class="table-responsive"><table class="table align-middle"><thead class="table-light"><tr><th>Tanggal</th><th>Booking</th><th>Tamu</th><th>Channel</th><th>Jumlah</th></tr></thead><tbody id="financeBody"></tbody></table></div>
             </div>
         </section>
 
         <section id="reportsSection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
                 <h5>Reports</h5>
-                <p class="text-muted mb-0">Laporan operasional, okupansi, revenue, pembatalan, dan performa channel akan tersedia di sini.</p>
+                <p class="text-muted">Ringkasan berdasarkan data demo dan reservasi lokal.</p><div class="row g-3 mb-3"><div class="col-md-3"><div class="card card-body"><small>Jumlah booking</small><strong id="reportBookings"></strong></div></div><div class="col-md-3"><div class="card card-body"><small>Confirmed</small><strong id="reportConfirmed"></strong></div></div><div class="col-md-3"><div class="card card-body"><small>Cancelled</small><strong id="reportCancelled"></strong></div></div><div class="col-md-3"><div class="card card-body"><small>Revenue</small><strong id="reportRevenue"></strong></div></div></div><button id="exportBookings" class="btn btn-outline-primary">Unduh CSV Reservasi</button>
             </div>
         </section>
 
         <section id="settingsSection" class="content-section d-none">
             <div class="card border-0 shadow-sm p-4">
                 <h5>Settings</h5>
-                <p class="text-muted mb-0">Profil hotel, pajak, kebijakan, pengguna, role, dan integrasi akan tersedia di sini.</p>
+                <p class="text-muted">Preferensi demo disimpan di browser ini.</p><form id="settingsForm" class="row g-3"><div class="col-md-6"><label class="form-label" for="hotelNameSetting">Nama properti</label><input id="hotelNameSetting" class="form-control" required></div><div class="col-md-3"><label class="form-label" for="taxSetting">Pajak (%)</label><input id="taxSetting" type="number" min="0" max="100" step="0.1" class="form-control"></div><div class="col-md-3"><label class="form-label" for="commissionSetting">Komisi OTA (%)</label><input id="commissionSetting" type="number" min="0" max="100" step="0.1" class="form-control"></div><div class="col-12"><button class="btn btn-primary">Simpan Pengaturan</button><span id="settingsMessage" class="small text-success ms-2"></span></div></form>
             </div>
         </section>
     </div>

@@ -1,4 +1,4 @@
-
+﻿
 // ==========================================
 // VILLA & SANCTUARY BY ASTRID
 // HOTEL REVENUE MANAGEMENT SYSTEM
@@ -541,6 +541,7 @@ function renderAllPages() {
     // 12. RESERVATIONS TABLE
 
     renderReservations();
+    if (typeof renderHotelFeatures === "function") renderHotelFeatures();
 }
 
 
@@ -734,10 +735,173 @@ function setupMobileSidebar() {
 
 // 17. INITIALIZE DASHBOARD
 
+// Operational menu pages use the same local reservation data as the dashboard.
+const HOTEL_FEATURES_KEY = "villaAstridFeatures";
+const FEATURE_CHANNELS = ["Traveloka", "Tiket.com", "Agoda", "Booking.com", "Expedia", "Trip.com", "Direct Website"];
+
+function featureState() {
+    try { return JSON.parse(localStorage.getItem(HOTEL_FEATURES_KEY)) || {}; }
+    catch (error) { return {}; }
+}
+
+function saveFeatureState(state) {
+    localStorage.setItem(HOTEL_FEATURES_KEY, JSON.stringify(state));
+}
+
+function localToday() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+function featureEmptyRow(columns, message = "Belum ada data.") {
+    return `<tr><td colspan="${columns}" class="text-center text-muted py-3">${message}</td></tr>`;
+}
+
+function renderHotelFeatures() {
+    const state = featureState();
+    const confirmed = bookingData.filter(item => item.status === "confirmed");
+    const arrivalsBody = getElement("arrivalsBody");
+    const departuresBody = getElement("departuresBody");
+    const today = localToday();
+    const renderTurnover = (body, rows, actionLabel, actionStatus) => {
+        if (!body) return;
+        body.innerHTML = rows.length ? rows.map(item => `<tr><td><strong>${escapeHtml(item.guest)}</strong><div class="small text-muted">${escapeHtml(item.id)}</div></td><td>${escapeHtml(item.room)} Â· ${Number(item.rooms) || 1}</td><td><span class="badge bg-secondary">${escapeHtml(state.turnover?.[item.id] || "Belum diproses")}</span></td><td><button class="btn btn-sm btn-outline-primary" data-turnover="${escapeHtml(item.id)}" data-turnover-status="${actionStatus}">${actionLabel}</button></td></tr>`).join("") : featureEmptyRow(4, "Tidak ada jadwal untuk hari ini." );
+    };
+    renderTurnover(arrivalsBody, confirmed.filter(item => item.checkInDate === today), "Check-in", "Checked-in");
+    renderTurnover(departuresBody, confirmed.filter(item => (item.departureDate || getDepartureDate(item.checkInDate, item.nights)) === today), "Check-out", "Checked-out");
+
+    const guestSearch = getElement("guestSearch")?.value.trim().toLowerCase() || "";
+    const guests = new Map();
+    bookingData.forEach(item => {
+        const key = item.guest.trim().toLowerCase();
+        if (!key) return;
+        const entry = guests.get(key) || { guest: item.guest, bookings: 0, channel: item.channel, spend: 0, lastDate: "" };
+        entry.bookings++;
+        entry.channel = item.channel;
+        if (item.status === "confirmed") entry.spend += Number(item.price) || 0;
+        entry.lastDate = [entry.lastDate, item.bookingDate || ""].sort().pop();
+        guests.set(key, entry);
+    });
+    const guestRows = [...guests.values()].filter(g => `${g.guest} ${g.channel}`.toLowerCase().includes(guestSearch)).sort((a, b) => a.guest.localeCompare(b.guest));
+    const guestBody = getElement("guestDirectoryBody");
+    if (guestBody) guestBody.innerHTML = guestRows.length ? guestRows.map(g => `<tr><td><strong>${escapeHtml(g.guest)}</strong></td><td>${g.bookings} booking</td><td>${escapeHtml(g.channel)}</td><td>${escapeHtml(g.lastDate || "-")}</td><td>${formatRupiah(g.spend)}</td></tr>`).join("") : featureEmptyRow(5, "Tamu tidak ditemukan.");
+
+    const inventory = state.inventory || [
+        { number: "101", type: "Standard Twin", capacity: 2, status: "Aktif" },
+        { number: "102", type: "Standard Double", capacity: 2, status: "Aktif" },
+        { number: "201", type: "Superior Double", capacity: 2, status: "Aktif" },
+        { number: "202", type: "Deluxe Double", capacity: 2, status: "Aktif" },
+        { number: "301", type: "Executive Double", capacity: 3, status: "Aktif" },
+        { number: "302", type: "Junior Suite Double", capacity: 3, status: "Aktif" }
+    ];
+    state.inventory = inventory;
+    if (!featureState().inventory) saveFeatureState(state);
+    const housekeepingBody = getElement("housekeepingBody");
+    if (housekeepingBody) housekeepingBody.innerHTML = inventory.map(room => {
+        const status = state.housekeeping?.[room.number] || "Bersih";
+        return `<tr><td><strong>${escapeHtml(room.number)}</strong></td><td>${escapeHtml(room.type)}</td><td><select class="form-select form-select-sm housekeeping-status" data-room="${escapeHtml(room.number)}"><option${status === "Bersih" ? " selected" : ""}>Bersih</option><option${status === "Perlu dibersihkan" ? " selected" : ""}>Perlu dibersihkan</option><option${status === "Sedang dibersihkan" ? " selected" : ""}>Sedang dibersihkan</option><option${status === "Perlu diperiksa" ? " selected" : ""}>Perlu diperiksa</option></select></td><td><input class="form-control form-control-sm housekeeping-note" data-room="${escapeHtml(room.number)}" value="${escapeHtml(state.notes?.[room.number] || "")}" placeholder="Catatan"></td><td><span class="small text-muted">${escapeHtml(room.status)}</span></td></tr>`;
+    }).join("");
+    const inventoryBody = getElement("inventoryBody");
+    if (inventoryBody) inventoryBody.innerHTML = inventory.map((room, index) => `<tr><td>${escapeHtml(room.number)}</td><td>${escapeHtml(room.type)}</td><td>${Number(room.capacity)} orang</td><td><select class="form-select form-select-sm inventory-status" data-index="${index}"><option${room.status === "Aktif" ? " selected" : ""}>Aktif</option><option${room.status === "Perbaikan" ? " selected" : ""}>Perbaikan</option><option${room.status === "Nonaktif" ? " selected" : ""}>Nonaktif</option></select></td><td><button class="btn btn-sm btn-outline-danger" data-remove-room="${index}">Hapus</button></td></tr>`).join("") || featureEmptyRow(5);
+
+    const rates = state.rates || {};
+    const ratesBody = getElement("ratesBody");
+    const rateStats = {};
+    confirmed.forEach(item => { const stats = rateStats[item.room] || { nights: 0, revenue: 0 }; stats.nights += (Number(item.nights) || 0) * (Number(item.rooms) || 1); stats.revenue += Number(item.price) || 0; rateStats[item.room] = stats; });
+    if (ratesBody) ratesBody.innerHTML = ROOM_TYPES.map(type => `<tr><td>${escapeHtml(type)}</td><td><input class="form-control form-control-sm room-rate" data-type="${escapeHtml(type)}" type="number" min="0" step="10000" value="${Number(rates[type]) || 0}" placeholder="Atur tarif"></td><td>${rateStats[type]?.nights || 0}</td><td>${formatRupiah(rateStats[type]?.revenue || 0)}</td></tr>`).join("");
+
+    const channelBody = getElement("channelManagerBody");
+    if (channelBody) channelBody.innerHTML = FEATURE_CHANNELS.map(channel => {
+        const count = bookingData.filter(item => item.channel === channel).length;
+        return `<tr><td><strong>${escapeHtml(channel)}</strong></td><td><span class="badge bg-secondary">Demo Â· belum terhubung</span></td><td>${count} booking lokal</td><td>${escapeHtml(state.lastSync || "Belum pernah")}</td></tr>`;
+    }).join("");
+
+    const financeBody = getElement("financeBody");
+    const commissionRate = Number(state.commission ?? 15);
+    const revenue = confirmed.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+    if (getElement("financeRevenue")) getElement("financeRevenue").textContent = formatRupiah(revenue);
+    if (getElement("financeCommission")) getElement("financeCommission").textContent = formatRupiah(confirmed.filter(item => item.channel !== "Direct Website").reduce((sum, item) => sum + (Number(item.price) || 0), 0) * commissionRate / 100);
+    if (getElement("financeNet")) getElement("financeNet").textContent = formatRupiah(revenue - confirmed.filter(item => item.channel !== "Direct Website").reduce((sum, item) => sum + (Number(item.price) || 0), 0) * commissionRate / 100);
+    if (financeBody) financeBody.innerHTML = confirmed.length ? confirmed.map(item => `<tr><td>${escapeHtml(item.bookingDate || "-")}</td><td>${escapeHtml(item.id)}</td><td>${escapeHtml(item.guest)}</td><td>${escapeHtml(item.channel)}</td><td>${formatRupiah(item.price)}</td></tr>`).join("") : featureEmptyRow(5);
+
+    const counters = { reportBookings: bookingData.length, reportConfirmed: confirmed.length, reportCancelled: bookingData.filter(item => item.status === "cancelled").length, reportRevenue: formatRupiah(revenue) };
+    Object.entries(counters).forEach(([id, value]) => { if (getElement(id)) getElement(id).textContent = value; });
+
+    const hotelName = getElement("hotelNameSetting");
+    if (hotelName && document.activeElement !== hotelName) hotelName.value = state.hotelName || "Villa & Sanctuary by Astrid";
+    const brandName = document.querySelector(".brand-title h5");
+    if (brandName) brandName.textContent = state.hotelName || "Villa & Sanctuary by Astrid";
+    const tax = getElement("taxSetting"); if (tax && document.activeElement !== tax) tax.value = state.tax ?? 11;
+    const commission = getElement("commissionSetting"); if (commission && document.activeElement !== commission) commission.value = commissionRate;
+
+    renderPlanner(inventory);
+}
+
+function renderPlanner(inventory) {
+    const input = getElement("plannerDate");
+    if (!input) return;
+    if (!input.value) input.value = localToday().slice(0, 7);
+    const [year, month] = input.value.split("-").map(Number);
+    const days = new Date(year, month, 0).getDate();
+    const head = getElement("plannerHead");
+    const body = getElement("plannerBody");
+    if (!head || !body) return;
+    head.innerHTML = `<tr><th>Kamar</th>${Array.from({ length: days }, (_, i) => `<th class="text-center">${i + 1}</th>`).join("")}</tr>`;
+    body.innerHTML = inventory.map(room => `<tr><th class="text-nowrap">${escapeHtml(room.number)}<div class="small text-muted fw-normal">${escapeHtml(room.type)}</div></th>${Array.from({ length: days }, (_, i) => {
+        const date = `${year}-${String(month).padStart(2, "0")}-${String(i + 1).padStart(2, "0")}`;
+        const booking = bookingData.find(item => item.status === "confirmed" && item.room === room.type && date >= item.checkInDate && date < (item.departureDate || getDepartureDate(item.checkInDate, item.nights)));
+        return `<td class="planner-day ${booking ? "bg-primary-subtle" : ""}" title="${booking ? escapeHtml(booking.guest) + " Â· " + escapeHtml(booking.id) : "Tersedia"}">${booking ? "â—" : ""}</td>`;
+    }).join("")}</tr>`).join("");
+}
+
+function setupHotelFeatures() {
+    renderHotelFeatures();
+    getElement("guestSearch")?.addEventListener("input", renderHotelFeatures);
+    getElement("plannerDate")?.addEventListener("change", () => renderPlanner(featureState().inventory || []));
+    document.addEventListener("change", event => {
+        const state = featureState();
+        if (event.target.matches(".housekeeping-status")) { state.housekeeping = { ...state.housekeeping, [event.target.dataset.room]: event.target.value }; saveFeatureState(state); }
+        if (event.target.matches(".housekeeping-note")) { state.notes = { ...state.notes, [event.target.dataset.room]: event.target.value }; saveFeatureState(state); }
+        if (event.target.matches(".inventory-status")) { state.inventory = state.inventory || []; state.inventory[Number(event.target.dataset.index)].status = event.target.value; saveFeatureState(state); }
+        if (event.target.matches(".room-rate")) { state.rates = { ...state.rates, [event.target.dataset.type]: Number(event.target.value) }; saveFeatureState(state); }
+    });
+    document.addEventListener("click", event => {
+        const turnover = event.target.closest("[data-turnover]");
+        if (turnover) { const state = featureState(); state.turnover = { ...state.turnover, [turnover.dataset.turnover]: turnover.dataset.turnoverStatus }; saveFeatureState(state); renderHotelFeatures(); }
+        if (event.target.closest("#addInventoryRoom")) {
+            const number = prompt("Nomor kamar baru:"); if (!number?.trim()) return;
+            const state = featureState(); state.inventory = state.inventory || [];
+            if (state.inventory.some(room => room.number === number.trim())) { alert("Nomor kamar sudah digunakan."); return; }
+            const type = prompt(`Tipe kamar (${ROOM_TYPES.join(", ")}):`, ROOM_TYPES[0]); if (!type || !ROOM_TYPES.includes(type)) { alert("Pilih tipe kamar yang tersedia."); return; }
+            state.inventory.push({ number: number.trim(), type, capacity: 2, status: "Aktif" }); saveFeatureState(state); renderHotelFeatures();
+        }
+        const remove = event.target.closest("[data-remove-room]");
+        if (remove) { const state = featureState(); state.inventory.splice(Number(remove.dataset.removeRoom), 1); saveFeatureState(state); renderHotelFeatures(); }
+        if (event.target.closest("#syncChannels")) { const state = featureState(); state.lastSync = new Date().toLocaleString("id-ID"); saveFeatureState(state); renderHotelFeatures(); if (getElement("syncMessage")) getElement("syncMessage").textContent = "Data lokal diperbarui; koneksi OTA langsung belum disiapkan."; }
+        if (event.target.closest("#exportBookings")) exportReservationsCsv();
+    });
+    getElement("settingsForm")?.addEventListener("submit", event => {
+        event.preventDefault(); const state = featureState(); state.hotelName = getElement("hotelNameSetting").value.trim(); state.tax = Number(getElement("taxSetting").value) || 0; state.commission = Number(getElement("commissionSetting").value) || 0; saveFeatureState(state);
+        if (getElement("settingsMessage")) getElement("settingsMessage").textContent = "Pengaturan tersimpan.";
+        renderHotelFeatures();
+    });
+    getElement("allReservationsBody")?.addEventListener("click", event => { if (event.target.closest(".btn-view-reservation")) setTimeout(renderHotelFeatures, 0); });
+    window.addEventListener("storage", event => { if (event.key === STORAGE_KEY || event.key === HOTEL_FEATURES_KEY) renderHotelFeatures(); });
+}
+
+function exportReservationsCsv() {
+    const columns = ["id", "guest", "channel", "room", "rooms", "checkInDate", "departureDate", "nights", "price", "status"];
+    const quote = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
+    const csv = [columns.join(","), ...bookingData.map(item => columns.map(key => quote(item[key])).join(","))].join("\r\n");
+    const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a"); link.href = url; link.download = "reservations.csv"; link.click(); URL.revokeObjectURL(url);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
     // Initial dashboard rendering
     renderAllPages();
+    setupHotelFeatures();
 
     // Global dashboard filters
     setupGlobalFilters();

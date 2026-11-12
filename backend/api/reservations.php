@@ -29,7 +29,7 @@ function apiStatus(string $status): string
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
         $query = $pdo->query(
-            'SELECT id, booking_date, check_in, check_out, guest_name, ota, room_type,
+            'SELECT id, booking_date, check_in, check_out, guest_name, guest_email, guest_phone, ota, room_type,
                     rooms, room_revenue, booking_status
              FROM reservations ORDER BY created_at DESC, id DESC'
         );
@@ -42,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             return [
                 'id' => 'BK-' . str_pad((string) $row['id'], 3, '0', STR_PAD_LEFT),
                 'guest' => $row['guest_name'],
+                'email' => $row['guest_email'],
+                'phone' => $row['guest_phone'],
                 'channel' => $row['ota'],
                 'otaClass' => $row['ota'] === 'Direct Website' ? 'ota-website' : '',
                 'room' => $row['room_type'],

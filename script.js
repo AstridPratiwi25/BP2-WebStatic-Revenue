@@ -1191,35 +1191,37 @@ function setupReservationDetails() {
         activeReservationId = reservation.id;
         detailsBody.innerHTML = `
             <div class="reservation-detail-row"><strong>Booking ID</strong><span>${escapeHtml(reservation.id)}</span></div>
-            <label for="editGuestName">Guest Name</label>
+            <div class="reservation-detail-row"><strong>Email</strong><span>${escapeHtml(reservation.email || "-")}</span></div>
+            <div class="reservation-detail-row"><strong>Nomor Telepon</strong><span>${escapeHtml(reservation.phone || "-")}</span></div>
+            <label for="editGuestName">Atas Nama / Nama Tamu</label>
             <input id="editGuestName" type="text" value="${escapeHtml(reservation.guest)}" required>
-            <label for="editBookingChannel">OTA Channel</label>
+            <label for="editBookingChannel">Channel Booking</label>
             <select id="editBookingChannel" required>
                 ${channelOptions.map(channel => `<option value="${escapeHtml(channel)}"${channel === reservation.channel ? " selected" : ""}>${escapeHtml(channel)}</option>`).join("")}
             </select>
-            <label for="editRoomType">Room Type</label>
+            <label for="editRoomType">Tipe Kamar</label>
             <select id="editRoomType" required>
                 ${ROOM_TYPES.map(roomType => `<option value="${escapeHtml(roomType)}"${roomType === reservation.room ? " selected" : ""}>${escapeHtml(roomType)}</option>`).join("")}
             </select>
-            <label for="editBookingRooms">Number of Rooms</label>
+            <label for="editBookingRooms">Jumlah Kamar</label>
             <input id="editBookingRooms" type="number" min="1" value="${rooms}" required>
-            <label for="editArrivalDate">Arrival Date</label>
+            <label for="editArrivalDate">Check-in</label>
             <input id="editArrivalDate" type="date" value="${escapeHtml(reservation.checkInDate || "")}" required>
-            <label for="editDepartureDate">Departure Date</label>
+            <label for="editDepartureDate">Check-out</label>
             <input id="editDepartureDate" type="date" value="${escapeHtml(reservation.departureDate || "")}" required>
-            <label for="editBookingNights">Duration (Nights)</label>
+            <label for="editBookingNights">Durasi Menginap (Malam)</label>
             <input id="editBookingNights" type="number" min="1" value="${nights || ""}" readonly required>
-            <label for="editBookingRate">Rate per Night (IDR)</label>
+            <label for="editBookingRate">Tarif per Malam (IDR)</label>
             <input id="editBookingRate" type="number" min="0" value="${rate}" required>
-            <label for="editBookingTotalAmount">Total Amount (IDR)</label>
+            <label for="editBookingTotalAmount">Total Harga (IDR)</label>
             <input id="editBookingTotalAmount" type="number" min="0" value="${Number(reservation.price) || 0}" readonly required>
-            <label for="editBookingStatus">Booking Status</label>
+            <label for="editBookingStatus">Status Reservasi</label>
             <select id="editBookingStatus" required>
                 <option value="confirmed"${reservation.status === "confirmed" ? " selected" : ""}>CONFIRMED</option>
                 <option value="pending"${reservation.status === "pending" ? " selected" : ""}>PENDING</option>
                 <option value="cancelled"${reservation.status === "cancelled" ? " selected" : ""}>CANCELLED</option>
             </select>
-            <div class="reservation-detail-row"><strong>Booking Date</strong><span>${escapeHtml(reservation.bookingDate || "-")}</span></div>
+            <div class="reservation-detail-row"><strong>Tanggal Booking</strong><span>${escapeHtml(reservation.bookingDate || "-")}</span></div>
         `;
 
         const arrivalDate = getElement("editArrivalDate");

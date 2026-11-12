@@ -213,6 +213,26 @@ function saveBookingData() {
     );
 }
 
+async function refreshReservationsFromServer() {
+    const response = await fetch("backend/api/reservations.php", { cache: "no-store" });
+    if (!response.ok) throw new Error("Server reservations could not be loaded.");
+
+    const result = await response.json();
+    if (!Array.isArray(result.reservations)) throw new Error("Invalid reservations response.");
+
+    bookingData = result.reservations.map(item => ({
+        ...item,
+        room: normalizeRoomType(item.room),
+        rooms: Number(item.rooms) || 1,
+        nights: Number(item.nights) || 1,
+        price: Number(item.price) || 0,
+        rate: Number(item.rate) || 0,
+        otaClass: item.otaClass || ""
+    }));
+    saveBookingData();
+    renderAllPages();
+}
+
 // 2. HELPER FUNCTIONS
 
 function formatRupiah(number) {
@@ -902,6 +922,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initial dashboard rendering
     renderAllPages();
     setupHotelFeatures();
+    refreshReservationsFromServer().catch(() => {
+        // Keep the locally saved demo data visible when the PHP API is not running.
+    });
 
     // Global dashboard filters
     setupGlobalFilters();
@@ -1000,13 +1023,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnRefresh = getElement("btnRefresh");
 
     if (btnRefresh) {
-        btnRefresh.addEventListener("click", () => {
-            alert(
-                "Demo mode: Dashboard data has been refreshed. " +
-                "Live OTA API integration is not connected yet."
-            );
-
-            renderAllPages();
+        btnRefresh.addEventListener("click", async () => {
+            try {
+                await refreshReservationsFromServer();
+                alert("Data reservasi berhasil diperbarui dari server.");
+            } catch (error) {
+                renderAllPages();
+                alert("Server belum terhubung. Dashboard menampilkan data lokal browser ini.");
+            }
         });
     }
 

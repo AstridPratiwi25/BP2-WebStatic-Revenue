@@ -2,7 +2,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/app.php';
-require_once __DIR__ . '/../config/database.php';
+try {
+    require_once __DIR__ . '/../config/database.php';
+} catch (Throwable $error) {
+    error_log($error->getMessage());
+    jsonResponse(503, ['error' => 'Database belum siap. Periksa konfigurasi koneksi dan migrasi.']);
+}
 
 function validStayDate(string $value): ?DateTimeImmutable
 {
@@ -26,9 +31,13 @@ if ($method === 'GET') {
     }
 
     try {
+        $includeInactive = ($_GET['admin'] ?? '') === '1';
+        if ($includeInactive) requireAdmin();
         $types = $pdo->query(
-            'SELECT room_type, description, max_guests, base_rate, inventory_count
-             FROM room_types WHERE is_active = 1 ORDER BY base_rate, room_type'
+            'SELECT rt.room_type, rt.description, rt.max_guests, rt.base_rate, rt.is_active,
+                    (SELECT COUNT(*) FROM hotel_rooms hr
+                     WHERE hr.room_type = rt.room_type AND hr.operational_status = \'Active\') AS inventory_count
+             FROM room_types rt ' . ($includeInactive ? '' : 'WHERE rt.is_active = 1 ') . 'ORDER BY rt.base_rate, rt.room_type'
         )->fetchAll();
         $availability = $pdo->prepare(
             "SELECT COALESCE(SUM(rooms), 0) FROM reservations
@@ -54,6 +63,7 @@ if ($method === 'GET') {
                 'rate' => (float) $type['base_rate'],
                 'inventory' => $inventory,
                 'available' => max(0, $inventory - $occupied),
+                'active' => (bool) $type['is_active'],
             ];
         }
         jsonResponse(200, ['rooms' => $rooms]);
@@ -69,19 +79,17 @@ if ($method === 'PATCH') {
     $input = requestJson();
     $name = trim((string) ($input['name'] ?? ''));
     $rate = filter_var($input['rate'] ?? null, FILTER_VALIDATE_FLOAT);
-    $inventory = filter_var($input['inventory'] ?? null, FILTER_VALIDATE_INT);
     $capacity = filter_var($input['capacity'] ?? null, FILTER_VALIDATE_INT);
     $active = filter_var($input['active'] ?? null, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     if ($name === '' || $rate === false || $rate < 0 || $rate > 100000000
-        || $inventory === false || $inventory < 0 || $inventory > 1000
         || $capacity === false || $capacity < 1 || $capacity > 20 || $active === null) {
-        jsonResponse(422, ['error' => 'Periksa kembali tarif, inventaris, kapasitas, dan status kamar.']);
+        jsonResponse(422, ['error' => 'Periksa kembali tarif, kapasitas, dan status kamar.']);
     }
     try {
         $update = $pdo->prepare(
-            'UPDATE room_types SET base_rate = ?, inventory_count = ?, max_guests = ?, is_active = ? WHERE room_type = ?'
+            'UPDATE room_types SET base_rate = ?, max_guests = ?, is_active = ? WHERE room_type = ?'
         );
-        $update->execute([$rate, $inventory, $capacity, $active ? 1 : 0, $name]);
+        $update->execute([$rate, $capacity, $active ? 1 : 0, $name]);
         if ($update->rowCount() === 0) {
             $exists = $pdo->prepare('SELECT 1 FROM room_types WHERE room_type = ?');
             $exists->execute([$name]);

@@ -31,6 +31,39 @@ INSERT INTO room_types (room_type, description, max_guests, base_rate, inventory
     ('Junior Suite Double', 'Suite dengan area duduk dan tempat tidur king.', 3, 2500000, 1, TRUE)
 ON DUPLICATE KEY UPDATE room_type = VALUES(room_type);
 
+CREATE TABLE IF NOT EXISTS hotel_rooms (
+    room_number VARCHAR(20) PRIMARY KEY,
+    room_type VARCHAR(100) NOT NULL,
+    capacity TINYINT UNSIGNED NOT NULL DEFAULT 2,
+    operational_status ENUM('Active','Maintenance','Inactive') NOT NULL DEFAULT 'Active',
+    housekeeping_status ENUM('Clean','Needs cleaning','In progress','Inspection') NOT NULL DEFAULT 'Clean',
+    housekeeping_note VARCHAR(500) NOT NULL DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_hotel_room_type_status (room_type, operational_status)
+);
+
+INSERT INTO hotel_rooms (room_number, room_type, capacity, operational_status) VALUES
+    ('101', 'Standard Twin', 2, 'Active'),
+    ('102', 'Standard Double', 2, 'Active'),
+    ('201', 'Superior Double', 2, 'Active'),
+    ('202', 'Deluxe Double', 2, 'Active'),
+    ('301', 'Executive Double', 3, 'Active'),
+    ('302', 'Junior Suite Double', 3, 'Active')
+ON DUPLICATE KEY UPDATE room_number = VALUES(room_number);
+
+CREATE TABLE IF NOT EXISTS hotel_settings (
+    id TINYINT UNSIGNED PRIMARY KEY,
+    property_name VARCHAR(150) NOT NULL,
+    tax_percent DECIMAL(5,2) UNSIGNED NOT NULL DEFAULT 11.00,
+    ota_commission_percent DECIMAL(5,2) UNSIGNED NOT NULL DEFAULT 15.00,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT INTO hotel_settings (id, property_name, tax_percent, ota_commission_percent)
+VALUES (1, 'Villa & Sanctuary by Astrid', 11.00, 15.00)
+ON DUPLICATE KEY UPDATE id = VALUES(id);
+
 CREATE TABLE IF NOT EXISTS admin_users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(64) NOT NULL UNIQUE,
@@ -45,4 +78,10 @@ CREATE TABLE IF NOT EXISTS admin_login_attempts (
     attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
     window_started_at DATETIME NOT NULL,
     blocked_until DATETIME NULL DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS booking_rate_limits (
+    ip_hash CHAR(64) PRIMARY KEY,
+    attempts SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    window_started_at DATETIME NOT NULL
 );

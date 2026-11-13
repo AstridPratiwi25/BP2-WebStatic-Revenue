@@ -2,7 +2,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/app.php';
-require_once __DIR__ . '/../config/database.php';
+try {
+    require_once __DIR__ . '/../config/database.php';
+} catch (Throwable $error) {
+    error_log($error->getMessage());
+    jsonResponse(503, ['error' => 'Database belum siap. Periksa konfigurasi koneksi dan migrasi.']);
+}
 
 function parseApiDate(string $value): ?DateTimeImmutable
 {
@@ -158,6 +163,14 @@ $isAdminCreate = ($input['source'] ?? '') === 'dashboard';
 if ($isAdminCreate) {
     requireAdmin();
     requireCsrf();
+} elseif (!empty($input['website'])) {
+    jsonResponse(422, ['error' => 'Data booking tidak valid.']);
+} else {
+    $originHost = strtolower((string) parse_url($_SERVER['HTTP_ORIGIN'] ?? '', PHP_URL_HOST));
+    $requestHost = strtolower((string) preg_replace('/:\\d+$/', '', $_SERVER['HTTP_HOST'] ?? ''));
+    if ($originHost !== '' && $requestHost !== '' && !hash_equals($requestHost, $originHost)) {
+        jsonResponse(403, ['error' => 'Permintaan lintas situs tidak diizinkan.']);
+    }
 }
 
 $guest = trim((string) ($input['guest'] ?? ''));
@@ -193,6 +206,23 @@ if ($guest === '' || mb_strlen($guest) > 150
     jsonResponse(422, ['error' => 'Periksa kembali nama, kontak, kamar, jumlah tamu, dan tanggal menginap.']);
 }
 
+if (!$isAdminCreate) {
+    $ipHash = hash('sha256', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    $limit = $pdo->prepare(
+        'INSERT INTO booking_rate_limits (ip_hash, attempts, window_started_at)
+         VALUES (?, 1, UTC_TIMESTAMP())
+         ON DUPLICATE KEY UPDATE
+            attempts = IF(window_started_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR), 1, attempts + 1),
+            window_started_at = IF(window_started_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR), UTC_TIMESTAMP(), window_started_at)'
+    );
+    $limit->execute([$ipHash]);
+    $attempts = $pdo->prepare('SELECT attempts FROM booking_rate_limits WHERE ip_hash = ?');
+    $attempts->execute([$ipHash]);
+    if ((int) $attempts->fetchColumn() > 20) {
+        jsonResponse(429, ['error' => 'Terlalu banyak permintaan booking dari koneksi ini. Coba lagi nanti.']);
+    }
+}
+
 $nights = (int) $start->diff($end)->days;
 try {
     $pdo->beginTransaction();
@@ -220,6 +250,7 @@ try {
     }
     $rate = $isAdminCreate ? (float) $rateInput : (float) $roomData['base_rate'];
     $revenue = $rate * $rooms * $nights;
+    $propertyName = (string) ($pdo->query('SELECT property_name FROM hotel_settings WHERE id = 1')->fetchColumn() ?: 'Villa & Sanctuary by Astrid');
     $insert = $pdo->prepare(
         'INSERT INTO reservations
             (property_name, booking_date, check_in, check_out, guest_name, guest_email, guest_phone,
@@ -229,7 +260,7 @@ try {
              :guest_count, :ota, :room, :rooms, :revenue, :status)'
     );
     $insert->execute([
-        ':property' => 'Villa & Sanctuary by Astrid',
+        ':property' => $propertyName,
         ':booking_date' => (new DateTimeImmutable('now', new DateTimeZone('Asia/Jakarta')))->format('Y-m-d'),
         ':check_in' => $start->format('Y-m-d'),
         ':check_out' => $end->format('Y-m-d'),

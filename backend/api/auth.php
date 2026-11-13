@@ -2,7 +2,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/app.php';
-require_once __DIR__ . '/../config/database.php';
+try {
+    require_once __DIR__ . '/../config/database.php';
+} catch (Throwable $error) {
+    error_log($error->getMessage());
+    jsonResponse(503, ['error' => 'Database belum siap. Periksa konfigurasi koneksi dan migrasi.']);
+}
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 

@@ -1,6 +1,5 @@
 (() => {
   const endpoint = 'backend/api';
-  const bookingKey = 'revenueTrackerBookings';
   const roomImages = {
     'Standard Twin': 'photo-1611892440504-42a792e24d32',
     'Standard Double': 'photo-1616594039964-ae9021a400a0',
@@ -224,7 +223,7 @@
           guests: Number(document.getElementById('guestCount').value),
           checkInDate,
           checkOutDate,
-          website: document.getElementById('companyWebsite').value
+          website: document.getElementById('companyWebsite').value.trim()
         })
       });
       notice.textContent = `Permintaan booking ${result.id} sudah diterima. Statusnya menunggu konfirmasi dari properti.`;

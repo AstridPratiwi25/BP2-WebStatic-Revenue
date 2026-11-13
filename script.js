@@ -204,7 +204,8 @@ function loadBookingData() {
     });
 }
 
-let bookingData = loadBookingData();
+let bookingData = [];
+let adminCsrfToken = "";
 
 function saveBookingData() {
     localStorage.setItem(
@@ -213,12 +214,94 @@ function saveBookingData() {
     );
 }
 
-async function refreshReservationsFromServer() {
-    const response = await fetch("backend/api/reservations.php", { cache: "no-store" });
-    if (!response.ok) throw new Error("Server reservations could not be loaded.");
+async function adminApiRequest(url, options = {}) {
+    const method = (options.method || "GET").toUpperCase();
+    const headers = { "Accept": "application/json", ...(options.headers || {}) };
+    if (method !== "GET" && method !== "HEAD") headers["X-CSRF-Token"] = adminCsrfToken;
+    const response = await fetch(url, { ...options, method, headers, credentials: "same-origin", cache: "no-store" });
+    const result = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+        const gate = getElement("adminGate");
+        if (gate) gate.hidden = false;
+        adminCsrfToken = "";
+    }
+    if (!response.ok) throw new Error(result.error || "Permintaan ke server gagal.");
+    return result;
+}
 
-    const result = await response.json();
-    if (!Array.isArray(result.reservations)) throw new Error("Invalid reservations response.");
+async function initializeAdminAccess() {
+    const gate = getElement("adminGate");
+    const loginForm = getElement("adminLoginForm");
+    const message = getElement("adminLoginError");
+    const button = getElement("adminLoginButton");
+    const logoutButton = getElement("btnAdminLogout");
+    const showError = error => { if (message) message.textContent = error.message || "Tidak dapat terhubung ke server."; };
+
+    const loadSession = async () => {
+        const response = await fetch("backend/api/auth.php", { credentials: "same-origin", cache: "no-store" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Layanan login belum siap.");
+        if (!result.authenticated) {
+            if (gate) gate.hidden = false;
+            return false;
+        }
+        adminCsrfToken = result.csrfToken;
+        if (gate) gate.hidden = true;
+        if (message) message.textContent = "";
+        return true;
+    };
+
+    try {
+        if (await loadSession()) await refreshReservationsFromServer();
+    } catch (error) {
+        if (gate) gate.hidden = false;
+        showError(error);
+    }
+
+    loginForm?.addEventListener("submit", async event => {
+        event.preventDefault();
+        if (!loginForm.reportValidity()) return;
+        if (button) button.disabled = true;
+        if (message) message.textContent = "Memeriksa akun…";
+        try {
+            const response = await fetch("backend/api/auth.php", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify({
+                    username: getElement("adminUsername").value.trim(),
+                    password: getElement("adminPassword").value
+                })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "Login gagal.");
+            adminCsrfToken = result.csrfToken;
+            getElement("adminPassword").value = "";
+            if (gate) gate.hidden = true;
+            if (message) message.textContent = "";
+            await refreshReservationsFromServer();
+        } catch (error) {
+            showError(error);
+        } finally {
+            if (button) button.disabled = false;
+        }
+    });
+
+    logoutButton?.addEventListener("click", async () => {
+        try {
+            await adminApiRequest("backend/api/auth.php", { method: "DELETE" });
+        } catch (_) {
+            // The gate still closes access locally if the session already expired.
+        }
+        adminCsrfToken = "";
+        if (gate) gate.hidden = false;
+        getElement("adminPassword")?.focus();
+    });
+}
+
+async function refreshReservationsFromServer() {
+    const result = await adminApiRequest("backend/api/reservations.php");
+    if (!Array.isArray(result.reservations)) throw new Error("Data reservasi dari server tidak valid.");
 
     bookingData = result.reservations.map(item => ({
         ...item,
@@ -229,7 +312,6 @@ async function refreshReservationsFromServer() {
         rate: Number(item.rate) || 0,
         otaClass: item.otaClass || ""
     }));
-    saveBookingData();
     renderAllPages();
 }
 
@@ -922,9 +1004,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initial dashboard rendering
     renderAllPages();
     setupHotelFeatures();
-    refreshReservationsFromServer().catch(() => {
-        // Keep the locally saved demo data visible when the PHP API is not running.
-    });
+    initializeAdminAccess();
 
     // Global dashboard filters
     setupGlobalFilters();
@@ -1028,8 +1108,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await refreshReservationsFromServer();
                 alert("Data reservasi berhasil diperbarui dari server.");
             } catch (error) {
-                renderAllPages();
-                alert("Server belum terhubung. Dashboard menampilkan data lokal browser ini.");
+                alert(error.message || "Data reservasi belum dapat diperbarui.");
             }
         });
     }
@@ -1092,60 +1171,40 @@ function setupReservationForm() {
     rateInput.addEventListener("input", updateTotalAmount);
     roomsInput.addEventListener("input", updateTotalAmount);
 
-    form.addEventListener("submit", event => {
+    form.addEventListener("submit", async event => {
         event.preventDefault();
         updateDuration();
         updateTotalAmount();
 
         if (!form.reportValidity()) return;
 
-        const channel = getElement("bookingChannel").value;
-        const channelClasses = {
-            "Traveloka": "ota-traveloka",
-            "Tiket.com": "ota-tiket",
-            "Agoda": "ota-agoda",
-            "Booking.com": "ota-booking",
-            "Expedia": "ota-expedia",
-            "Trip.com": "ota-trip",
-            "Direct Website": "ota-website"
-        };
-        const nextId = bookingData.reduce((highestId, booking) => {
-            const match = booking.id.match(/^BK-(\d+)$/);
-            return match ? Math.max(highestId, Number(match[1])) : highestId;
-        }, 0) + 1;
-        const today = new Date();
-        const bookingDate = [
-            today.getFullYear(),
-            String(today.getMonth() + 1).padStart(2, "0"),
-            String(today.getDate()).padStart(2, "0")
-        ].join("-");
-        const reservation = {
-            id: `BK-${nextId}`,
-            guest: getElement("guestName").value.trim(),
-            channel,
-            otaClass: channelClasses[channel],
-            room: getElement("roomType").value.trim(),
-            rooms: Number(roomsInput.value),
-            nights: Number(nightsInput.value),
-            rate: Number(rateInput.value),
-            price: Number(totalAmountInput.value),
-            status: getElement("bookingStatus").value.toLowerCase(),
-            bookingDate,
-            checkInDate: arrivalDate.value,
-            departureDate: departureDate.value
-        };
-
-        bookingData.push(reservation);
         try {
-            saveBookingData();
+            const result = await adminApiRequest("backend/api/reservations.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    source: "dashboard",
+                    guest: getElement("guestName").value.trim(),
+                    email: getElement("adminGuestEmail").value.trim(),
+                    phone: getElement("adminGuestPhone").value.trim(),
+                    guests: Number(getElement("adminGuestCount").value),
+                    channel: getElement("bookingChannel").value,
+                    room: getElement("roomType").value.trim(),
+                    rooms: Number(roomsInput.value),
+                    checkInDate: arrivalDate.value,
+                    checkOutDate: departureDate.value,
+                    rate: Number(rateInput.value),
+                    status: getElement("bookingStatus").value.toLowerCase()
+                })
+            });
+            await refreshReservationsFromServer();
+            alert(`Reservasi ${result.id} berhasil disimpan.`);
         } catch (error) {
-            bookingData.pop();
             console.error("Failed to save reservation:", error);
-            alert("Reservation could not be saved. Please check browser storage settings and try again.");
+            alert(error.message || "Reservasi gagal disimpan.");
             return;
         }
 
-        renderAllPages();
         form.reset();
         nightsInput.value = "";
         departureDate.min = "";
@@ -1191,10 +1250,14 @@ function setupReservationDetails() {
         activeReservationId = reservation.id;
         detailsBody.innerHTML = `
             <div class="reservation-detail-row"><strong>Booking ID</strong><span>${escapeHtml(reservation.id)}</span></div>
-            <div class="reservation-detail-row"><strong>Email</strong><span>${escapeHtml(reservation.email || "-")}</span></div>
-            <div class="reservation-detail-row"><strong>Nomor Telepon</strong><span>${escapeHtml(reservation.phone || "-")}</span></div>
+            <label for="editGuestEmail">Email</label>
+            <input id="editGuestEmail" type="email" value="${escapeHtml(reservation.email || "")}" autocomplete="email">
+            <label for="editGuestPhone">Nomor Telepon</label>
+            <input id="editGuestPhone" type="tel" value="${escapeHtml(reservation.phone || "")}" autocomplete="tel">
             <label for="editGuestName">Atas Nama / Nama Tamu</label>
             <input id="editGuestName" type="text" value="${escapeHtml(reservation.guest)}" required>
+            <label for="editGuestCount">Jumlah Tamu</label>
+            <input id="editGuestCount" type="number" min="1" max="20" value="${Number(reservation.guests) || 1}" required>
             <label for="editBookingChannel">Channel Booking</label>
             <select id="editBookingChannel" required>
                 ${channelOptions.map(channel => `<option value="${escapeHtml(channel)}"${channel === reservation.channel ? " selected" : ""}>${escapeHtml(channel)}</option>`).join("")}
@@ -1219,7 +1282,10 @@ function setupReservationDetails() {
             <select id="editBookingStatus" required>
                 <option value="confirmed"${reservation.status === "confirmed" ? " selected" : ""}>CONFIRMED</option>
                 <option value="pending"${reservation.status === "pending" ? " selected" : ""}>PENDING</option>
+                <option value="checked-in"${reservation.status === "checked-in" ? " selected" : ""}>CHECKED-IN</option>
+                <option value="checked-out"${reservation.status === "checked-out" ? " selected" : ""}>CHECKED-OUT</option>
                 <option value="cancelled"${reservation.status === "cancelled" ? " selected" : ""}>CANCELLED</option>
+                <option value="no-show"${reservation.status === "no-show" ? " selected" : ""}>NO-SHOW</option>
             </select>
             <div class="reservation-detail-row"><strong>Tanggal Booking</strong><span>${escapeHtml(reservation.bookingDate || "-")}</span></div>
         `;
@@ -1282,7 +1348,7 @@ function setupReservationDetails() {
         }
     });
 
-    form.addEventListener("submit", event => {
+    form.addEventListener("submit", async event => {
         event.preventDefault();
         const reservation = bookingData.find(item => item.id === activeReservationId);
         if (!reservation) return;
@@ -1323,6 +1389,9 @@ function setupReservationDetails() {
         const previousReservation = { ...reservation };
         Object.assign(reservation, {
             guest: getElement("editGuestName").value.trim(),
+            guests: Number(getElement("editGuestCount").value),
+            email: getElement("editGuestEmail").value.trim(),
+            phone: getElement("editGuestPhone").value.trim(),
             channel,
             otaClass: channelClasses[channel] || reservation.otaClass,
             room: getElement("editRoomType").value.trim(),
@@ -1336,16 +1405,34 @@ function setupReservationDetails() {
         });
 
         try {
-            saveBookingData();
+            await adminApiRequest("backend/api/reservations.php", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: reservation.id,
+                    guest: reservation.guest,
+                    guests: reservation.guests,
+                    email: reservation.email,
+                    phone: reservation.phone,
+                    channel: reservation.channel,
+                    room: reservation.room,
+                    rooms: reservation.rooms,
+                    checkInDate: reservation.checkInDate,
+                    departureDate: reservation.departureDate,
+                    rate: reservation.rate,
+                    status: reservation.status
+                })
+            });
+            await refreshReservationsFromServer();
         } catch (error) {
             Object.assign(reservation, previousReservation);
             console.error("Failed to update reservation:", error);
-            alert("Reservation changes could not be saved. Please check browser storage settings and try again.");
+            alert(error.message || "Perubahan reservasi gagal disimpan.");
             return;
         }
 
-        renderAllPages();
-        showReservation(reservation);
+        const updatedReservation = bookingData.find(item => item.id === activeReservationId);
+        showReservation(updatedReservation || reservation);
     });
 
     closeButton.addEventListener("click", closeModal);

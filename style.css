@@ -244,3 +244,30 @@ body {
     color: white;
     border: none;
 }
+
+.admin-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(15, 34, 29, 0.92);
+}
+
+.admin-gate[hidden] { display: none !important; }
+
+.admin-gate-card {
+    width: min(430px, 100%);
+    padding: clamp(26px, 6vw, 42px);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .28);
+}
+
+.admin-gate-card h1 { margin: 0 0 8px; font-size: 1.8rem; font-weight: 700; }
+.admin-login-form { display: grid; gap: 9px; margin-top: 24px; }
+.admin-login-form label { margin-top: 8px; font-size: .9rem; font-weight: 600; }
+.admin-login-form input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #d7ddd9; border-radius: 8px; }
+.admin-login-form input:focus { outline: 3px solid rgba(13, 110, 253, .2); border-color: #0d6efd; }
+.admin-login-error { min-height: 1.4em; color: #b42318; font-size: .9rem; }

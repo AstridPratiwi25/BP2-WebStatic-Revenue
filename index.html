@@ -10,6 +10,22 @@
 </head>
 <body>
 
+    <div id="adminGate" class="admin-gate" role="dialog" aria-modal="true" aria-labelledby="adminGateTitle">
+        <div class="admin-gate-card">
+            <div class="text-gold small fw-bold text-uppercase mb-2">Villa &amp; Sanctuary</div>
+            <h1 id="adminGateTitle">Login Dashboard</h1>
+            <p class="text-muted">Masuk untuk mengelola reservasi dan data tamu.</p>
+            <form id="adminLoginForm" class="admin-login-form">
+                <label for="adminUsername">Username</label>
+                <input id="adminUsername" name="username" autocomplete="username" required maxlength="64">
+                <label for="adminPassword">Password</label>
+                <input id="adminPassword" name="password" type="password" autocomplete="current-password" required maxlength="1024">
+                <div id="adminLoginError" class="admin-login-error" role="alert" aria-live="polite"></div>
+                <button id="adminLoginButton" class="btn btn-dark w-100" type="submit">Masuk ke dashboard</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Overlay Mobile -->
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
@@ -91,6 +107,7 @@
                 </div>
             </div>
             <button id="btnRefresh" class="btn btn-primary shadow-sm">🔄 Sync Data OTA</button>
+            <button id="btnAdminLogout" class="btn btn-outline-secondary shadow-sm">Keluar</button>
         </header>
 
         
@@ -423,6 +440,15 @@
 
                 <label for="guestName">Guest Name</label>
                 <input type="text" id="guestName" required>
+
+                <label for="adminGuestEmail">Guest Email</label>
+                <input type="email" id="adminGuestEmail" autocomplete="email">
+
+                <label for="adminGuestPhone">Guest Phone</label>
+                <input type="tel" id="adminGuestPhone" autocomplete="tel">
+
+                <label for="adminGuestCount">Number of Guests</label>
+                <input type="number" id="adminGuestCount" min="1" max="20" value="1" required>
 
                 <label for="bookingChannel">OTA Channel</label>
                 <select id="bookingChannel" required>

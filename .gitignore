@@ -1,0 +1,7 @@
+/backend/config/database.local.php
+/backend/config/app.local.php
+*.log
+*.tmp
+/.env
+/.env.*
+!/.env.example

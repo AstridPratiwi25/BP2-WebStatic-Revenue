@@ -1,7 +1,6 @@
 USE revenue_tracker;
 
 ALTER TABLE reservations
-    ADD COLUMN guest_count TINYINT UNSIGNED NOT NULL DEFAULT 1 AFTER guest_phone,
     MODIFY booking_status ENUM(
         'Pending',
         'Confirmed',
@@ -10,6 +9,22 @@ ALTER TABLE reservations
         'Cancelled',
         'No-show'
     ) NOT NULL DEFAULT 'Pending';
+
+SET @guest_count_exists = (
+    SELECT COUNT(*)
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'reservations'
+      AND COLUMN_NAME = 'guest_count'
+);
+SET @guest_count_migration = IF(
+    @guest_count_exists = 0,
+    'ALTER TABLE reservations ADD COLUMN guest_count TINYINT UNSIGNED NOT NULL DEFAULT 1 AFTER guest_phone',
+    'SELECT 1'
+);
+PREPARE guest_count_statement FROM @guest_count_migration;
+EXECUTE guest_count_statement;
+DEALLOCATE PREPARE guest_count_statement;
 
 CREATE TABLE IF NOT EXISTS room_types (
     room_type VARCHAR(100) PRIMARY KEY,

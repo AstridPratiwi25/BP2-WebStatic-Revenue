@@ -104,8 +104,14 @@
     const checkIn = document.getElementById('checkin').value;
     const checkOut = document.getElementById('checkout').value;
     const count = Number(document.getElementById('roomsCount').value) || 1;
+    const guestCount = Number(document.getElementById('guestCount').value) || 1;
     const room = rooms.find(item => item.name === roomSelect.value);
     const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0;
+    document.getElementById('guestCount').setCustomValidity(
+      room && guestCount > Number(room.capacity) * count
+        ? `Jumlah tamu melebihi kapasitas ${count} kamar ${room.name}.`
+        : ''
+    );
     document.getElementById('staySummary').textContent = nights > 0
       ? `${nights} malam · ${count} kamar`
       : 'Pilih tanggal menginap';
@@ -122,7 +128,12 @@
     if (checkIn) document.getElementById('checkin').value = checkIn;
     if (checkOut) document.getElementById('checkout').value = checkOut;
     document.getElementById('checkout').min = checkIn || today;
-    document.getElementById('guestCount').value = document.getElementById('searchGuests').value.split(' ')[0];
+    const guestCount = Number(document.getElementById('searchGuests').value.split(' ')[0]) || 1;
+    document.getElementById('guestCount').value = String(guestCount);
+    const selectedRoom = rooms.find(room => room.name === roomSelect.value);
+    if (selectedRoom) {
+      document.getElementById('roomsCount').value = String(Math.min(3, Math.max(1, Math.ceil(guestCount / Number(selectedRoom.capacity)))));
+    }
     notice.classList.remove('show');
     modal.classList.add('open');
     updateTotal();
@@ -171,7 +182,7 @@
     if (selectedStay) renderRooms(document.getElementById('searchRoom').value, selectedStay);
   });
 
-  ['checkin', 'checkout', 'roomType', 'roomsCount'].forEach(id => {
+  ['checkin', 'checkout', 'roomType', 'roomsCount', 'guestCount'].forEach(id => {
     document.getElementById(id).addEventListener('change', updateTotal);
   });
   document.getElementById('checkin').addEventListener('change', event => {

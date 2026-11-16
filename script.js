@@ -14,6 +14,7 @@ const ROOM_TYPES = [
     "Executive Double",
     "Junior Suite Double"
 ];
+const REVENUE_STATUSES = new Set(["confirmed", "checked-in", "checked-out"]);
 
 function normalizeRoomType(roomType) {
     if (ROOM_TYPES.includes(roomType)) {
@@ -148,7 +149,7 @@ async function initializeAdminAccess() {
     });
 }
 
-async function refreshReservationsFromServer() {
+async function refreshReservationsFromServer({ renderFeatures = true } = {}) {
     const result = await adminApiRequest("backend/api/reservations.php");
     if (!Array.isArray(result.reservations)) throw new Error("Data reservasi dari server tidak valid.");
 
@@ -162,6 +163,7 @@ async function refreshReservationsFromServer() {
         otaClass: item.otaClass || ""
     }));
     renderAllPages();
+    if (renderFeatures) renderHotelFeatures();
 }
 
 async function refreshOperationsFromServer() {
@@ -257,7 +259,7 @@ function renderAllPages() {
             return;
         }
 
-        if (item.status !== "confirmed") return;
+        if (!REVENUE_STATUSES.has(item.status)) return;
 
         totalRevenue += item.price;
         totalNights += item.nights * roomCount;
@@ -502,7 +504,6 @@ function renderAllPages() {
     // 12. RESERVATIONS TABLE
 
     renderReservations();
-    if (typeof renderHotelFeatures === "function") renderHotelFeatures();
 }
 
 
@@ -709,7 +710,7 @@ function featureEmptyRow(columns, message = "Belum ada data.") {
 }
 
 function renderHotelFeatures() {
-    const confirmed = bookingData.filter(item => ["confirmed", "checked-in", "checked-out"].includes(item.status));
+    const confirmed = bookingData.filter(item => REVENUE_STATUSES.has(item.status));
     const arrivalsBody = getElement("arrivalsBody");
     const departuresBody = getElement("departuresBody");
     const today = localToday();
@@ -728,7 +729,7 @@ function renderHotelFeatures() {
         const entry = guests.get(key) || { guest: item.guest, bookings: 0, channel: item.channel, spend: 0, lastDate: "" };
         entry.bookings++;
         entry.channel = item.channel;
-        if (item.status === "confirmed") entry.spend += Number(item.price) || 0;
+        if (REVENUE_STATUSES.has(item.status)) entry.spend += Number(item.price) || 0;
         entry.lastDate = [entry.lastDate, item.bookingDate || ""].sort().pop();
         guests.set(key, entry);
     });
@@ -794,7 +795,7 @@ function renderPlanner(inventory) {
     head.innerHTML = `<tr><th>Kamar</th>${Array.from({ length: days }, (_, i) => `<th class="text-center">${i + 1}</th>`).join("")}</tr>`;
     body.innerHTML = inventory.map(room => `<tr><th class="text-nowrap">${escapeHtml(room.number)}<div class="small text-muted fw-normal">${escapeHtml(room.type)}</div></th>${Array.from({ length: days }, (_, i) => {
         const date = `${year}-${String(month).padStart(2, "0")}-${String(i + 1).padStart(2, "0")}`;
-        const booking = bookingData.find(item => item.status === "confirmed" && item.room === room.type && date >= item.checkInDate && date < (item.departureDate || getDepartureDate(item.checkInDate, item.nights)));
+        const booking = bookingData.find(item => ["pending", "confirmed", "checked-in"].includes(item.status) && item.room === room.type && date >= item.checkInDate && date < (item.departureDate || getDepartureDate(item.checkInDate, item.nights)));
         return `<td class="planner-day ${booking ? "bg-primary-subtle" : ""}" title="${booking ? escapeHtml(booking.guest) + " Â· " + escapeHtml(booking.id) : "Tersedia"}">${booking ? "â—" : ""}</td>`;
     }).join("")}</tr>`).join("");
 }
@@ -852,8 +853,12 @@ async function updateReservationStatus(item, status) {
 }
 
 function exportReservationsCsv() {
-    const columns = ["id", "guest", "channel", "room", "rooms", "checkInDate", "departureDate", "nights", "price", "status"];
-    const quote = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
+    const columns = ["id", "guest", "email", "phone", "guests", "channel", "room", "rooms", "checkInDate", "departureDate", "nights", "price", "status"];
+    const quote = value => {
+        const text = String(value ?? "");
+        const safe = /^[\t\r ]*[=+\-@]/.test(text) ? `'${text}` : text;
+        return `"${safe.replace(/"/g, '""')}"`;
+    };
     const csv = [columns.join(","), ...bookingData.map(item => columns.map(key => quote(item[key])).join(","))].join("\r\n");
     const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a"); link.href = url; link.download = "reservations.csv"; link.click(); URL.revokeObjectURL(url);
@@ -867,14 +872,16 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeAdminAccess();
     window.addEventListener("focus", () => {
         if (adminCsrfToken) {
-            refreshReservationsFromServer().catch(() => {});
-            refreshOperationsFromServer().catch(() => {});
+            const editingOperations = document.activeElement?.matches(
+                ".housekeeping-status, .housekeeping-note, .inventory-status, .room-rate, #hotelNameSetting, #taxSetting, #commissionSetting"
+            );
+            refreshReservationsFromServer({ renderFeatures: !editingOperations }).catch(() => {});
+            if (!editingOperations) refreshOperationsFromServer().catch(() => {});
         }
     });
     window.setInterval(() => {
         if (!document.hidden && adminCsrfToken) {
-            refreshReservationsFromServer().catch(() => {});
-            refreshOperationsFromServer().catch(() => {});
+            refreshReservationsFromServer({ renderFeatures: false }).catch(() => {});
         }
     }, 30000);
 

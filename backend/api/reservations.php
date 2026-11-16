@@ -98,7 +98,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
 
     try {
         $pdo->beginTransaction();
-        $roomQuery = $pdo->prepare('SELECT base_rate, max_guests, inventory_count, is_active FROM room_types WHERE room_type = ? FOR UPDATE');
+        $roomQuery = $pdo->prepare(
+            "SELECT base_rate, max_guests, is_active,
+                    (SELECT COUNT(*) FROM hotel_rooms WHERE room_type = room_types.room_type AND operational_status = 'Active') AS inventory_count
+             FROM room_types WHERE room_type = ? FOR UPDATE"
+        );
         $roomQuery->execute([$room]);
         $roomData = $roomQuery->fetch();
         if (!$roomData) {
@@ -226,7 +230,11 @@ if (!$isAdminCreate) {
 $nights = (int) $start->diff($end)->days;
 try {
     $pdo->beginTransaction();
-    $roomQuery = $pdo->prepare('SELECT base_rate, max_guests, inventory_count, is_active FROM room_types WHERE room_type = ? FOR UPDATE');
+    $roomQuery = $pdo->prepare(
+        "SELECT base_rate, max_guests, is_active,
+                (SELECT COUNT(*) FROM hotel_rooms WHERE room_type = room_types.room_type AND operational_status = 'Active') AS inventory_count
+         FROM room_types WHERE room_type = ? FOR UPDATE"
+    );
     $roomQuery->execute([$room]);
     $roomData = $roomQuery->fetch();
     if (!$roomData || (!$isAdminCreate && !(bool) $roomData['is_active'])) {

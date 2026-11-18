@@ -24,7 +24,7 @@ SET @guest_count_migration = IF(
 );
 PREPARE guest_count_statement FROM @guest_count_migration;
 EXECUTE guest_count_statement;
-DEALLOCATE PREPARE guest_count_statement;
+DEALLOCATE PREPARE guest_count_statement;t
 
 CREATE TABLE IF NOT EXISTS room_types (
     room_type VARCHAR(100) PRIMARY KEY,
